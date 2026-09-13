@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hong Kong Live Train Operations Display</title><link rel="stylesheet" href="styles.css"></head>
+<body><div id="app">
+<header class="topbar">
+  <div class="brand"><div class="pulse"></div><div><strong>HK Train Operations</strong><span>Telemetry · official ETA fusion · WTT/GeoTD fallback</span></div></div>
+  <div class="clockblock"><span id="clock">--:--:--</span><small>Hong Kong time</small></div>
+  <div class="controls">
+    <label>Schedule<select id="profile"></select></label>
+    <button id="nowBtn" class="primary">Now</button><button id="playBtn">Pause</button>
+    <label>Speed<select id="speed"><option value="1">1×</option><option value="10">10×</option><option value="60">60×</option><option value="300">300×</option></select></label>
+    <label>History<select id="replayMode"><option value="0">Live / current</option><option value="5">−5 min</option><option value="15">−15 min</option><option value="30">−30 min</option><option value="60">−60 min</option></select></label>
+    <a class="navbtn" href="light_rail.html">Light Rail</a>
+  </div>
+</header>
+<main class="layout">
+  <section class="map-panel">
+    <div class="statusrow"><div><span class="badge">SCHEDULE SIMULATION</span><span id="profileStatus"></span></div><div class="map-actions"><span id="mapResolution" class="map-res">GeoTD 6K</span><a class="map-source-link" href="assets/GeoTD.pdf" target="_blank" rel="noopener" title="Open original vector GeoTD PDF">Vector PDF</a><button id="zoomOut">−</button><button id="resetMap">Reset</button><button id="zoomIn">+</button></div></div>
+    <div id="mapViewport" class="map-viewport" tabindex="0" aria-label="Interactive train map. Drag to pan and use wheel or zoom buttons to zoom.">
+      <div id="mapWorld" class="map-world"><img id="mapImage" src="assets/geotd-map-6000.png" data-res="6K" width="6000" height="5455" loading="eager" decoding="async" alt="Hong Kong geographic railway track diagram, high-resolution GeoTD"><div id="markers" class="markers"></div></div>
+    </div>
+    <div class="timeline"><input id="timeRange" type="range" min="14400" max="100800" step="30"><div><span>04:00</span><strong id="simTime">--:--:--</strong><span>28:00</span></div></div>
+    <div id="legend" class="legend"></div>
+  </section>
+  <aside class="sidebar">
+    <div class="summary"><div><b id="activeCount">0</b><span>active trains</span></div><div><b id="sourceCount">0</b><span>source trips</span></div></div>
+    <div class="sideTabs"><button id="trainsTab" class="active">Trains</button><button id="opsTab">Operations</button></div>
+    <div id="trainPane">
+      <div id="warningBox" class="warning"></div>
+      <div class="filterHead"><strong>Lines</strong><button id="allLines">All</button></div><div id="lineFilters" class="lineFilters"></div>
+      <label class="search"><span>Find train</span><input id="search" placeholder="Trip / train no."></label>
+      <div id="trainList" class="trainList"></div>
+    </div>
+    <div id="opsPane" class="hidden">
+      <div class="opsHead"><strong>Network operations</strong><span id="historyStatus">History starting…</span></div>
+      <div id="opsCards" class="opsCards"></div>
+      <div id="opsAlerts" class="opsAlerts"></div>
+      <div class="opsTableWrap"><table class="opsTable"><thead><tr><th>Line</th><th>Active</th><th>Source</th><th>Delay</th><th>Trend</th></tr></thead><tbody id="opsTableBody"></tbody></table></div>
+      <div class="opsFoot">Headway alerts use projected common-terminal gaps from currently active trips. Telemetry/ETA/WTT confidence is shown separately.</div>
+    </div>
+  </aside>
+</main>
+<div id="detail" class="detail detail-wide hidden"><button id="closeDetail">×</button><div id="detailBody"></div></div>
+</div><script src="data.js"></script><script src="app.js"></script></body></html>
