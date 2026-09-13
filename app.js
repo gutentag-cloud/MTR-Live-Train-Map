@@ -28,12 +28,55 @@ function liveTimeAligned(tolerance=20){return replayMinutes===0&&speed===1&&Math
 function realTimeMode(){return playing&&liveTimeAligned(20)}
 function railSource(){return replayMinutes>0?replayRail:liveRail}
 function ealSource(){return replayMinutes>0?replayEal:liveEal}
-function liveModeActive(){let e=ealSource();if(replayMinutes>0)return !!(e&&e.ok&&e.trains?.length);return !!(e&&e.available&&!e.stale&&(Date.now()-e.lastSuccess<6000)&&realTimeMode())}
+function ealAgeMs(){
+  let e=ealSource();
+  return e?.lastSuccess ? Date.now()-e.lastSuccess : Infinity;
+}
+
+function ealFresh(){
+  let e=ealSource();
+  if(replayMinutes>0)return !!(e&&e.ok&&e.trains?.length);
+  return !!(
+    e &&
+    e.available &&
+    !e.stale &&
+    e.trains?.length &&
+    ealAgeMs()<6000 &&
+    realTimeMode()
+  );
+}
+
+function ealHoldActive(){
+  let e=ealSource();
+  if(replayMinutes>0)return false;
+  return !!(
+    e &&
+    e.available &&
+    e.trains?.length &&
+    ealAgeMs()<20000 &&
+    realTimeMode()
+  );
+}
+
+function liveModeActive(){
+  return replayMinutes>0 ? !!(ealSource()?.trains?.length) : ealHoldActive();
+}
 function etaModeActive(){let r=railSource();if(replayMinutes>0)return !!(r&&r.ok&&(r.line_offsets||r.lineOffsets));return !!(r&&r.available&&(Date.now()-r.lastSuccess<120000)&&liveTimeAligned(90))}
 function etaInactiveReason(){if(replayMinutes>0)return replayRail?'':'no ETA snapshot near replay time';if(location.protocol==='file:')return 'run serve_live.py (direct file mode cannot call the ETA proxy)';if(profileKey!==autoProfile())return 'selected timetable profile is not the current Hong Kong service day';if(speed!==1)return 'simulation speed is not 1×';let drift=Math.abs(simSec-hkNow().serviceSec);if(drift>90)return `display time is ${Math.round(drift)}s away from Now`;if(!liveRail.available)return liveRail.error||'ETA feed is still warming up';if(Date.now()-liveRail.lastSuccess>=120000)return 'last usable ETA snapshot is over 120s old';return liveRail.error||'no usable ETA anchors';}
 function tripKey(t){return `${t[1]}|${t[0]}|${t[2][0][1]}`}
 function correctionFor(t){if(!etaModeActive())return null;let r=railSource(),corr=r.corrections||{},offs=r.line_offsets||r.lineOffsets||{};let c=corr[tripKey(t)];if(c&&(c.confidence==='high'||c.confidence==='medium'))return c;let l=offs[t[1]];return l?{delay_sec:l.delay_sec,samples:l.samples,confidence:`line-${l.confidence}`,spread_sec:l.mean_residual_sec,lineLevel:true,anchors:[]}:null}
-function updateLiveBadge(){let b=document.querySelector('.badge'),row=document.querySelector('.statusrow>div:first-child');if(!b)return;let tms=liveModeActive(),eta=etaModeActive(),rt=realTimeMode();b.textContent=replayMinutes?`HISTORY REPLAY −${replayMinutes}m`:tms?'LIVE TELEMETRY + ETA FUSION':eta?'LIVE ETA-CORRECTED':rt?'WTT FALLBACK':'WTT SIMULATION';b.classList.toggle('live',tms||eta);let pill=document.querySelector('#ealLivePill');if(!pill){pill=document.createElement('span');pill.id='ealLivePill';pill.className='ops-pill';row?.appendChild(pill)}let e=ealSource();if(replayMinutes&&e?.trains?.length){pill.className='ops-pill ok';pill.innerHTML=`<strong>EAL REPLAY</strong><span>${e.trains.length} train sets · captured snapshot</span>`}else if(tms){pill.className='ops-pill ok';pill.innerHTML=`<strong>EAL TELEMETRY</strong><span>${liveEal.trains.length} train sets · ${liveEal.updatedAt||'updating'}</span>`}else if(liveEal.available&&liveEal.stale){pill.className='ops-pill';pill.innerHTML='<strong>EAL STALE</strong><span>WTT/ETA fallback active</span>'}else{pill.className='ops-pill neutral';pill.innerHTML=`<strong>EAL TELEMETRY</strong><span>${escapeHtml(liveEal.error||'WTT/ETA fallback active')}</span>`}let rp=document.querySelector('#railLivePill');if(!rp){rp=document.createElement('span');rp.id='railLivePill';rp.className='ops-pill';row?.appendChild(rp)}let r=railSource(),offs=r?.line_offsets||r?.lineOffsets||{};if(eta){let n=Object.keys(r?.corrections||{}).length,lines=Object.entries(offs).slice(0,4).map(([k,v])=>`${k} ${v.delay_sec>=0?'+':''}${v.delay_sec}s`).join(' · '),diag=!replayMinutes&&liveRail.total?`${liveRail.freshStations}/${liveRail.total} fresh anchors${liveRail.partial?' · bootstrap':''}${liveRail.cycleMs!=null?' · '+liveRail.cycleMs+'ms':''}`:'';rp.className='ops-pill ok';rp.innerHTML=`<strong>${replayMinutes?'ETA REPLAY':liveRail.partial?'MTR ETA FUSION · FAST START':'MTR ETA FUSION'}</strong><span>${n} matched trips${diag?' · '+diag:''}${lines?' · '+lines:''}</span>`}else if(liveRail.error||liveRail.available){rp.className='ops-pill';rp.innerHTML=`<strong>MTR ETA UNAVAILABLE/STALE</strong><span>${escapeHtml(etaInactiveReason())} · WTT fallback active</span>`}else{rp.className='ops-pill neutral';rp.innerHTML=`<strong>MTR ETA FEED</strong><span>${escapeHtml(etaInactiveReason())} · WTT active meanwhile</span>`}}
+function updateLiveBadge(){let b=document.querySelector('.badge'),row=document.querySelector('.statusrow>div:first-child');if(!b)return;let tms=liveModeActive(),eta=etaModeActive(),rt=realTimeMode();b.textContent=replayMinutes?`HISTORY REPLAY −${replayMinutes}m`:tms?'LIVE TELEMETRY + ETA FUSION':eta?'LIVE ETA-CORRECTED':rt?'WTT FALLBACK':'WTT SIMULATION';b.classList.toggle('live',tms||eta);let pill=document.querySelector('#ealLivePill');if(!pill){pill=document.createElement('span');pill.id='ealLivePill';pill.className='ops-pill';row?.appendChild(pill)}let e=ealSource();if(replayMinutes&&e?.trains?.length){pill.className='ops-pill ok';pill.innerHTML=`<strong>EAL REPLAY</strong><span>${e.trains.length} train sets · captured snapshot</span>`}else if(tms){
+  if(ealFresh()){
+    pill.className='ops-pill ok';
+    pill.innerHTML=`<strong>EAL TELEMETRY</strong><span>${liveEal.trains.length} train sets · ${liveEal.updatedAt||'updating'}</span>`;
+  }else{
+    pill.className='ops-pill';
+    pill.innerHTML=`<strong>EAL SIGNAL HOLD</strong><span>last TMS ${Math.round(ealAgeMs()/1000)}s ago · waiting for next signal</span>`;
+  }
+}else if(liveEal.available&&liveEal.stale){
+  pill.className='ops-pill';
+  pill.innerHTML='<strong>EAL STALE</strong><span>ETA/WTT fallback active</span>';
+}else{pill.className='ops-pill neutral';pill.innerHTML=`<strong>EAL TELEMETRY</strong><span>${escapeHtml(liveEal.error||'WTT/ETA fallback active')}</span>`}let rp=document.querySelector('#railLivePill');if(!rp){rp=document.createElement('span');rp.id='railLivePill';rp.className='ops-pill';row?.appendChild(rp)}let r=railSource(),offs=r?.line_offsets||r?.lineOffsets||{};if(eta){let n=Object.keys(r?.corrections||{}).length,lines=Object.entries(offs).slice(0,4).map(([k,v])=>`${k} ${v.delay_sec>=0?'+':''}${v.delay_sec}s`).join(' · '),diag=!replayMinutes&&liveRail.total?`${liveRail.freshStations}/${liveRail.total} fresh anchors${liveRail.partial?' · bootstrap':''}${liveRail.cycleMs!=null?' · '+liveRail.cycleMs+'ms':''}`:'';rp.className='ops-pill ok';rp.innerHTML=`<strong>${replayMinutes?'ETA REPLAY':liveRail.partial?'MTR ETA FUSION · FAST START':'MTR ETA FUSION'}</strong><span>${n} matched trips${diag?' · '+diag:''}${lines?' · '+lines:''}</span>`}else if(liveRail.error||liveRail.available){rp.className='ops-pill';rp.innerHTML=`<strong>MTR ETA UNAVAILABLE/STALE</strong><span>${escapeHtml(etaInactiveReason())} · WTT fallback active</span>`}else{rp.className='ops-pill neutral';rp.innerHTML=`<strong>MTR ETA FEED</strong><span>${escapeHtml(etaInactiveReason())} · WTT active meanwhile</span>`}}
 async function pollEal(){if(location.protocol==='file:'){liveEal.error='Run serve_live.py for live EAL data';updateLiveBadge();return}let next=2000;try{let r=await fetch(apiUrl('/api/eal'),{cache:'no-store'});if(!r.ok)throw new Error(`HTTP ${r.status}`);let j=await r.json();if(j.loading){liveEal.error='EAL telemetry worker starting';next=500}else if(j.ok){liveEal={available:true,trains:j.trains||[],updatedAt:j.upstream_updated_at||null,fetchedAt:j.fetched_at||null,error:j.error||null,stale:!!j.stale,lastSuccess:sourceStampMs(j)}}else{throw new Error(j.error||'feed unavailable')}}catch(e){if(!liveEal.available)liveEal.available=false;liveEal.error=String(e?.message||e);next=1000}updateLiveBadge();render();setTimeout(pollEal,next)}
 async function pollRail(){if(location.protocol==='file:'){liveRail.error='Run serve_live.py for official live ETA correction';updateLiveBadge();return}let next=10000;try{let r=await fetch(apiUrl('/api/rail-live'),{cache:'no-store'}),j=await r.json();if(!r.ok)throw new Error(`HTTP ${r.status}`);if(j.loading){let c=j.completed_requests||0,t=j.total_requests||55;liveRail.error=`ETA fast-start bootstrap ${c}/${t} station requests`;next=500}else if(j.ok){liveRail={available:true,corrections:j.corrections||{},lineOffsets:j.line_offsets||{},matchedByLine:j.matched_by_line||{},fetchedAt:j.fetched_at||null,error:j.stale?(j.error||'using cached ETA snapshot'):null,lastSuccess:sourceStampMs(j),partial:!!j.partial,phase:j.phase||null,completed:j.completed_requests||0,total:j.total_requests||0,freshStations:j.fresh_station_count||0,cachedStations:j.cached_station_count||0,cycleMs:j.cycle_elapsed_ms??null};next=j.partial?750:j.stale?2500:8000}else{throw new Error(j.error||'feed unavailable')}}catch(e){if(!liveRail.available)liveRail.available=false;liveRail.error=String(e?.message||e);next=1500}updateLiveBadge();render();setTimeout(pollRail,next)}
 async function pollHistory(){if(location.protocol==='file:'){$('#historyStatus').textContent='History requires serve_live.py';return}try{let r=await fetch(apiUrl('/api/history?minutes=120&kinds=eal,rail,lrt'),{cache:'no-store'}),j=await r.json();if(r.ok&&j.ok){historySnapshots=j.snapshots||[];historyMeta=j.status||null;historyLastFetch=Date.now();let rows=historyMeta?.rows||historySnapshots.length;$('#historyStatus').textContent=`${rows.toLocaleString()} stored snapshots · 24h rolling`;if(replayMinutes)applyReplaySnapshot(replayMinutes)}}catch(e){$('#historyStatus').textContent='History store unavailable'}setTimeout(pollHistory,15000)}
