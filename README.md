@@ -1,4 +1,4 @@
-# HK Train Operations Display v9.3
+# HK Train Operations Display
 
 A local-first Hong Kong railway operations visualization built from the supplied Working Timetables and GeoTD track diagram, augmented with public/live data when available.
 
@@ -45,7 +45,7 @@ See `OPERATIONS_FEATURES.md`, `LIVE_ACCURACY.md` and `DATA_COVERAGE.md` for meth
 
 ## v9.2 fast ETA / resilience fix
 
-ETA startup was rebuilt in v9.2. Heavy-rail station endpoints are fetched concurrently, with two high-yield anchors per line fetched first. A usable partial ETA solution is published as soon as enough fast bootstrap anchors cover several lines; the rest of the bootstrap and full station sweep continue in the background. On normal refreshes the previous complete solution stays visible until the next complete sweep finishes, avoiding ETA/WTT flicker.
+ETA startup was rebuilt. Heavy-rail station endpoints are fetched concurrently, with two high-yield anchors per line fetched first. A usable partial ETA solution is published as soon as enough fast bootstrap anchors cover several lines; the rest of the bootstrap and full station sweep continue in the background. On normal refreshes the previous complete solution stays visible until the next complete sweep finishes, avoiding ETA/WTT flicker.
 
 The WTT matcher now uses a station/timing-point index instead of rescanning every trip for every arrival/candidate delay. Station responses are cached independently for up to 120 seconds, so one slow/failing endpoint does not invalidate the whole network. Per-request timeouts are 2.5 seconds, transient failures retain the last good snapshot, and browser freshness is based on the server sample timestamp rather than the time the browser happened to poll it.
 
