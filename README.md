@@ -1,4 +1,4 @@
-# HK Train Operations Display
+# HK Train Operations Display v10
 
 A local-first Hong Kong railway operations visualization built from the supplied Working Timetables and GeoTD track diagram, augmented with public/live data when available.
 
@@ -43,9 +43,9 @@ See `OPERATIONS_FEATURES.md`, `LIVE_ACCURACY.md` and `DATA_COVERAGE.md` for meth
 - Track road/junction names are shown only where the available source exposes an unambiguous direction/platform/route relationship. The application does not invent an Up/Down road identifier.
 
 
-## v9.2 fast ETA / resilience fix
+## v10 fast ETA / resilience fix
 
-ETA startup was rebuilt. Heavy-rail station endpoints are fetched concurrently, with two high-yield anchors per line fetched first. A usable partial ETA solution is published as soon as enough fast bootstrap anchors cover several lines; the rest of the bootstrap and full station sweep continue in the background. On normal refreshes the previous complete solution stays visible until the next complete sweep finishes, avoiding ETA/WTT flicker.
+ETA startup was rebuilt in v10. Heavy-rail station endpoints are fetched concurrently, with two high-yield anchors per line fetched first. A usable partial ETA solution is published as soon as enough fast bootstrap anchors cover several lines; the rest of the bootstrap and full station sweep continue in the background. On normal refreshes the previous complete solution stays visible until the next complete sweep finishes, avoiding ETA/WTT flicker.
 
 The WTT matcher now uses a station/timing-point index instead of rescanning every trip for every arrival/candidate delay. Station responses are cached independently for up to 120 seconds, so one slow/failing endpoint does not invalidate the whole network. Per-request timeouts are 2.5 seconds, transient failures retain the last good snapshot, and browser freshness is based on the server sample timestamp rather than the time the browser happened to poll it.
 
@@ -58,3 +58,9 @@ For diagnostics open `http://localhost:8080/api/health`; it reports ETA phase, c
 The main map now uses an adaptive multi-resolution render of the supplied original `GeoTD.pdf` vector artwork. It starts at 6000 px wide, drops to 3200 px only when zoomed out, and automatically loads the canonical `assets/geotd-map.png` at 12000 x 10910 above 2.15x map zoom. This avoids decoding the 12K image unnecessarily on initial load while keeping labels and track geometry sharp at close zoom. The original vector `assets/GeoTD.pdf` is also included and can be opened from the **Vector PDF** control above the map.
 
 The Light Rail crop is regenerated from the same 12K source at 3163 x 4314 rather than the earlier 843 x 1150 crop. All train/station coordinates remain in the same normalized GeoTD coordinate frame; this change affects display resolution only, not calibration.
+
+## v10: historical delay prediction + station board
+
+The main sidebar now has a **Board** tab. Select any heavy-rail station, optionally restrict it to one serving line, and choose a 30/60/120-minute window. `serve_live.py` queries that station directly from the official MTR Next Train API rather than waiting for the full network ETA sweep. Direct API rows show an exact `HH:MM:SS` timestamp and a countdown that updates every second. Later trains are filled with WTT plus the recorded historical-delay forecast.
+
+v10 also learns short-term delay momentum from the rolling local history store. The inspector shows forecasts for now / +5 / +10 / +20 minutes, and the Operations table adds a `+10m` delay forecast column. The model is intentionally conservative and reports its confidence/sample count rather than treating extrapolation as telemetry. See `PREDICTIONS_BOARD.md` for the method and limitations.

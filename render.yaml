@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: mtr-live-train-map-api
+    runtime: python
+    plan: free
+
+    buildCommand: python3 -m py_compile serve_live.py
+    startCommand: python3 serve_live.py --no-browser
+
+    healthCheckPath: /api/health
+
+    envVars:
+      - key: EAL_TMS_API_KEY
+        sync: false
+
+      - key: CORS_ORIGIN
+        value: https://gutentag-cloud.github.io

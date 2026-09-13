@@ -87,3 +87,13 @@ Static HTML/JS/CSS responses are served with `Cache-Control: no-store` so replac
 - Original vector PDF is exposed as a read-only map source link in the UI.
 
 - Mean absolute RGB difference after downsampling the 12K render back to the legacy 3200 x 2910 raster: about 1 channel value, consistent with antialiasing only and confirming the same page bounds/content.
+
+## v10 prediction / board QA
+
+- Python syntax: `serve_live.py` compiled successfully.
+- JavaScript syntax: `node --check app.js` passed.
+- Station-board server unit test: direct selected-station fetch returned two mocked lines; the second request reused the short cache without another upstream call.
+- Historical predictor unit test: a synthetic +2.0 sec/min delay series was recovered as +2.0 sec/min with high confidence and near-zero residual error.
+- DOM integration test (Chromium via in-memory page injection): 84 heavy-rail station choices populated; Board tab opened; 40 WTT/prediction rows rendered; Operations table contains the new +10m forecast column; no page errors.
+- Synthetic 20-minute TWL history test: Board reported +81s at +10 minutes from a +2.0 sec/min historical trend with high confidence; selected-train inspector rendered the new forecast card with no JS errors.
+- Browser navigation to localhost/file URLs is blocked by this execution sandbox, so the integration test used the same HTML/data/app code injected into an in-memory Chromium page. This limitation is environmental, not a site routing issue.

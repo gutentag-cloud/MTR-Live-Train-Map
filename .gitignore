@@ -1,0 +1,23 @@
+# Secrets / captured network traffic
+*.har
+.env
+.env.*
+!.env.example
+
+# Runtime data
+runtime/
+*.sqlite
+*.sqlite3
+*.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/

@@ -24,21 +24,33 @@
   </section>
   <aside class="sidebar">
     <div class="summary"><div><b id="activeCount">0</b><span>active trains</span></div><div><b id="sourceCount">0</b><span>source trips</span></div></div>
-    <div class="sideTabs"><button id="trainsTab" class="active">Trains</button><button id="opsTab">Operations</button></div>
+    <div class="sideTabs"><button id="trainsTab" class="active">Trains</button><button id="boardTab">Board</button><button id="opsTab">Operations</button></div>
     <div id="trainPane">
       <div id="warningBox" class="warning"></div>
       <div class="filterHead"><strong>Lines</strong><button id="allLines">All</button></div><div id="lineFilters" class="lineFilters"></div>
       <label class="search"><span>Find train</span><input id="search" placeholder="Trip / train no."></label>
       <div id="trainList" class="trainList"></div>
     </div>
+    <div id="boardPane" class="hidden">
+      <div class="boardControls">
+        <label><span>Station</span><select id="boardStation"></select></label>
+        <label><span>Line</span><select id="boardLine"><option value="">All serving lines</option></select></label>
+        <label><span>Window</span><select id="boardHorizon"><option value="30">30 min</option><option value="60" selected>60 min</option><option value="120">120 min</option></select></label>
+      </div>
+      <div class="boardClock"><div><strong id="boardStationName">Station board</strong><span id="boardSource">WTT ready</span></div><time id="boardNow">--:--:--</time></div>
+      <div id="predictionSummary" class="predictionSummary"></div>
+      <div class="departureHead"><span>Destination / train</span><span>Expected</span></div>
+      <div id="departureBoard" class="departureBoard"></div>
+      <div class="boardFoot">LIVE ETA rows use the official MTR timestamp directly. HISTORY PRED rows extrapolate the recorded delay trend and remain estimates. All countdowns update to the second.</div>
+    </div>
     <div id="opsPane" class="hidden">
       <div class="opsHead"><strong>Network operations</strong><span id="historyStatus">History starting…</span></div>
       <div id="opsCards" class="opsCards"></div>
       <div id="opsAlerts" class="opsAlerts"></div>
-      <div class="opsTableWrap"><table class="opsTable"><thead><tr><th>Line</th><th>Active</th><th>Source</th><th>Delay</th><th>Trend</th></tr></thead><tbody id="opsTableBody"></tbody></table></div>
+      <div class="opsTableWrap"><table class="opsTable"><thead><tr><th>Line</th><th>Active</th><th>Source</th><th>Delay</th><th>+10m</th><th>Trend</th></tr></thead><tbody id="opsTableBody"></tbody></table></div>
       <div class="opsFoot">Headway alerts use projected common-terminal gaps from currently active trips. Telemetry/ETA/WTT confidence is shown separately.</div>
     </div>
   </aside>
 </main>
 <div id="detail" class="detail detail-wide hidden"><button id="closeDetail">×</button><div id="detailBody"></div></div>
-</div><script src="data.js"></script><script src="app.js"></script></body></html>
+</div><script src="config.js"></script><script src="data.js"></script><script src="app.js"></script></body></html>

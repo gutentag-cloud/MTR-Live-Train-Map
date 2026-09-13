@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Serve HK Train Display v9.3 with telemetry, resilient ETA fusion, WTT fallback and local replay history.
+"""Serve HK Train Display v10 with telemetry, resilient ETA fusion, WTT fallback and local replay history.
 
 Live hierarchy:
   * EAL: RocTec TMS telemetry (HAR-discovered API key, server-side only)
@@ -195,7 +195,7 @@ class HistoryStore:
             db.execute("INSERT INTO snapshots(ts,kind,payload) VALUES(?,?,?)",(now,kind,json.dumps(safe,separators=(",",":"),ensure_ascii=False)))
             db.execute("DELETE FROM snapshots WHERE ts<?",(now-self.retention_hours*3600,))
         self._last[kind]=now
-    def query(self, minutes=30, kinds=None, limit=900):
+    def query(self, minutes=30, kinds=None, limit=5000):
         minutes=max(1,min(24*60,int(minutes)))
         since=time.time()-minutes*60
         kinds=[x for x in (kinds or ["eal","rail","lrt"]) if x in {"eal","rail","lrt"}]
@@ -360,7 +360,7 @@ class TimetableMatcher:
 class HeavyRailSource(CachedSource):
     def __init__(self, matcher, history=None):
         super().__init__(); self.matcher=matcher; self.history=history
-        self.station_cache={}; self.cycle=0
+        self.station_cache={}; self.board_cache={}; self.board_lock=threading.Lock(); self.cycle=0
 
     def _fetch_station(self,line,sta):
         url=MTR_API+"?"+urllib.parse.urlencode({"line":line,"sta":sta,"lang":"en"})
@@ -374,14 +374,62 @@ class HeavyRailSource(CachedSource):
                     if row.get("valid") not in (None,"Y"):continue
                     when=parse_hk_timestamp(row.get("time"))
                     if not when:continue
-                    eta=sec_of_day(when); now=sec_of_day(hk_now())
-                    if eta < now-6*3600:eta+=86400
+                    eta=sec_of_day(when); now_dt=hk_now(); now=sec_of_day(now_dt)
+                    if now_dt.hour < 4: eta+=86400
+                    elif eta < now-6*3600:eta+=86400
                     obs.append({"line":line,"station":sta,"direction":direction,"dest":row.get("dest"),
                         "platform":row.get("plat"),"seq":row.get("seq"),"ttnt":row.get("ttnt"),
                         "eta":row.get("time"),"eta_sec":eta})
             return line,sta,obs,j.get("sys_time") or j.get("curr_time"),None
         except Exception as exc:
             return line,sta,[],None,type(exc).__name__
+
+    def station_board(self, lines, station, max_age=8):
+        """Fetch one selected station on demand for second-accurate departure boards.
+
+        Uses the official MTR Next Train API directly and reuses a short local cache so
+        opening the board does not wait for the network-wide ETA fusion cycle. Successful
+        responses are also inserted into station_cache and therefore improve the main ETA
+        matcher on its next publish.
+        """
+        now=time.time(); lines=[x for x in dict.fromkeys(lines or []) if x and x != "LRL"]
+        valid=[]
+        for line in lines:
+            try:
+                if station in self.matcher.station_index(line): valid.append(line)
+            except Exception:
+                continue
+        if not valid:
+            return {"ok":False,"station":station,"observations":[],"error":"No WTT service for the requested line/station"}
+        out=[]; errors=[]; fetched=[]; cached=[]
+        todo=[]
+        with self.board_lock:
+            for line in valid:
+                ent=self.board_cache.get((line,station))
+                if ent and now-ent["ts"] <= max_age:
+                    out.extend(ent["observations"]); cached.append(line)
+                else: todo.append(line)
+        if todo:
+            with ThreadPoolExecutor(max_workers=min(6,len(todo)),thread_name_prefix="mtr-board") as pool:
+                futs=[pool.submit(self._fetch_station,line,station) for line in todo]
+                for fut in as_completed(futs):
+                    line,sta,obs,sys_time,err=fut.result()
+                    if err is None:
+                        ts=time.time()
+                        with self.board_lock:self.board_cache[(line,sta)]={"ts":ts,"observations":obs,"sys_time":sys_time}
+                        self.station_cache[(line,sta)]={"observations":obs,"sys_time":sys_time,"ts":ts}
+                        out.extend(obs); fetched.append(line)
+                    else: errors.append(f"{line}-{sta}:{err}")
+        # If a direct board fetch fails, use a still-valid station cache rather than blanking the board.
+        if not out:
+            for line in valid:
+                ent=self.station_cache.get((line,station))
+                if ent and now-ent["ts"] <= STATION_CACHE_SEC:
+                    out.extend(ent["observations"]); cached.append(line)
+        out.sort(key=lambda x:x.get("eta_sec",10**9))
+        return {"ok":bool(out),"station":station,"lines":valid,"observations":out,
+                "fetched_lines":fetched,"cached_lines":list(dict.fromkeys(cached)),"errors":errors[:10],
+                "fetched_at":dt.datetime.now(dt.timezone.utc).isoformat(),"source":"MTR official Next Train API"}
 
     def _run_batch(self,targets,fresh_keys,errors,completed,total,started,phase,on_progress=None):
         if not targets:return completed
@@ -556,6 +604,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def _json(self,data,status=200):
         body=json.dumps(data,separators=(",",":"),ensure_ascii=False).encode("utf-8")
         self.send_response(status); self.send_header("Content-Type","application/json; charset=utf-8")
+        self.send_header("Access-Control-Allow-Origin",os.environ.get("CORS_ORIGIN","*"))
+        self.send_header("Vary","Origin")
         self.send_header("Cache-Control","no-store"); self.send_header("Content-Length",str(len(body))); self.end_headers(); self.wfile.write(body)
     def end_headers(self):
         # Avoid stale JS/CSS/HTML when users replace one build with another on the same localhost URL.
@@ -566,10 +616,17 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         path=self.path.split("?",1)[0]
         if path=="/api/health":
             r=self.heavy.get(); l=self.lrt.get(); e=self.eal.get()
-            self._json({"ok":True,"version":"9.2","rail":{"ok":bool(r.get("ok")),"loading":bool(r.get("loading")),"phase":r.get("phase"),"completed":r.get("completed_requests"),"total":r.get("total_requests"),"fresh_stations":r.get("fresh_station_count"),"cached_stations":r.get("cached_station_count"),"failures":r.get("failed_request_count"),"elapsed_ms":r.get("cycle_elapsed_ms"),"fetched_at":r.get("fetched_at"),"errors":r.get("errors",[])[:5]},"lrt":{"ok":bool(l.get("ok")),"fresh_stations":l.get("fresh_station_count"),"cached_stations":l.get("cached_station_count"),"elapsed_ms":l.get("cycle_elapsed_ms"),"fetched_at":l.get("fetched_at"),"errors":l.get("errors",[])[:5]},"eal":{"ok":bool(e.get("ok")),"loading":bool(e.get("loading")),"stale":bool(e.get("stale")),"fetched_at":e.get("fetched_at"),"error":e.get("error")}}); return
+            self._json({"ok":True,"version":"10","rail":{"ok":bool(r.get("ok")),"loading":bool(r.get("loading")),"phase":r.get("phase"),"completed":r.get("completed_requests"),"total":r.get("total_requests"),"fresh_stations":r.get("fresh_station_count"),"cached_stations":r.get("cached_station_count"),"failures":r.get("failed_request_count"),"elapsed_ms":r.get("cycle_elapsed_ms"),"fetched_at":r.get("fetched_at"),"errors":r.get("errors",[])[:5]},"lrt":{"ok":bool(l.get("ok")),"fresh_stations":l.get("fresh_station_count"),"cached_stations":l.get("cached_station_count"),"elapsed_ms":l.get("cycle_elapsed_ms"),"fetched_at":l.get("fetched_at"),"errors":l.get("errors",[])[:5]},"eal":{"ok":bool(e.get("ok")),"loading":bool(e.get("loading")),"stale":bool(e.get("stale")),"fetched_at":e.get("fetched_at"),"error":e.get("error")}}); return
         if path=="/api/eal": self._json(self.eal.get()); return
         if path=="/api/rail-live": self._json(self.heavy.get()); return
         if path=="/api/lrt-live": self._json(self.lrt.get()); return
+        if path=="/api/station-board":
+            q=urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
+            station=(q.get("station") or [""])[0].strip().upper()
+            lines=[x.strip().upper() for x in (q.get("lines") or [""])[0].split(",") if x.strip()]
+            if not station or not lines:
+                self._json({"ok":False,"error":"station and lines are required","observations":[]},400); return
+            self._json(self.heavy.station_board(lines,station)); return
         if path=="/api/history":
             q=urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
             mins=int((q.get("minutes") or ["30"])[0])
@@ -591,7 +648,7 @@ def find_har(arg):
 
 
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument("--har"); ap.add_argument("--port",type=int,default=8080); ap.add_argument("--no-browser",action="store_true"); args=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument("--har"); ap.add_argument("--port",type=int,default=int(os.environ.get("PORT","8080"))); ap.add_argument("--no-browser",action="store_true"); args=ap.parse_args()
     eal_url=os.environ.get("EAL_TMS_URL",EAL_DEFAULT_URL); key=os.environ.get("EAL_TMS_API_KEY"); har=find_har(args.har)
     if not key and har and har.exists():
         eal_url,key=discover_from_har(har); print(f"EAL TMS configuration loaded from HAR: {har.name} (credential remains server-side)")
@@ -606,8 +663,8 @@ def main():
     if eal: threading.Thread(target=eal.loop,daemon=True).start()
     threading.Thread(target=heavy.loop,daemon=True).start(); threading.Thread(target=lrt.loop,daemon=True).start()
 
-    handler=functools.partial(Handler,directory=str(ROOT)); httpd=http.server.ThreadingHTTPServer(("127.0.0.1",args.port),handler)
-    address=f"http://localhost:{args.port}"; print(f"HK Train Display v9.3: {address}")
+    handler=functools.partial(Handler,directory=str(ROOT)); httpd=http.server.ThreadingHTTPServer(("0.0.0.0",args.port),handler)
+    address=f"http://localhost:{args.port}"; print(f"HK Train Display v10: {address}")
     print(f"Fast live workers started: heavy rail {HEAVY_WORKERS} concurrent requests, LRT {LRT_WORKERS}; ETA bootstrap publishes before the full sweep finishes.")
     if not args.no_browser: threading.Timer(.7,lambda:webbrowser.open(address)).start()
     try:httpd.serve_forever()
