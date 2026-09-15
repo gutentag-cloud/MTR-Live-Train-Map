@@ -1,0 +1,227 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 586" role="img" aria-label="v12 calibrated railway schematic">
+<rect width="1000" height="586" fill="#071116"/>
+<path d="M210 416 L950 416 L980 586 L300 586 Z" fill="#0c1a22" opacity=".8"/>
+<path d="M40 20 L650 20 L650 210 L40 210 Z" fill="#0b171e" opacity=".65"/>
+<path d="M209,215 L247,215 L285,215 L324,215 L363,217 L363,217 L399,219 L440,219 L478,219 L515,247 L515,277 L515,310 L515,344 L515,378 L515,456 L438,456" fill="none" stroke="#020609" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+<path d="M209,215 L247,215 L285,215 L324,215 L363,217 L363,217 L399,219 L440,219 L478,219 L515,247 L515,277 L515,310 L515,344 L515,378 L515,456 L438,456" fill="none" stroke="#d71920" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M245,444 L294,444 L341,444 L389,444 L438,456 L515,456 L566,444 L611,444 L662,444 L716,444 L771,444 L829,444 L865,461 L898,486 L930,511 L930,548 L930,575" fill="none" stroke="#020609" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+<path d="M245,444 L294,444 L341,444 L389,444 L438,456 L515,456 L566,444 L611,444 L662,444 L716,444 L771,444 L829,444 L865,461 L898,486 L930,511 L930,548 L930,575" fill="none" stroke="#0079c2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M850,345 L825,345 L825,319 L825,289 L825,260 L792,220 L760,220 L731,220 L694,220 L655,220 L618,220 L577,220 L515,247 L515,277 L515,310 L659,340 L693,363" fill="none" stroke="#020609" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+<path d="M850,345 L825,345 L825,319 L825,289 L825,260 L792,220 L760,220 L731,220 L694,220 L655,220 L618,220 L577,220 L515,247 L515,277 L515,310 L659,340 L693,363" fill="none" stroke="#00a651" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M771,444 L829,444 L825,345 L850,345 L894,345 L932,292 L932,250" fill="none" stroke="#020609" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+<path d="M771,444 L829,444 L825,345 L850,345 L894,345 L932,292 L932,250" fill="none" stroke="#7b4397" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M771,444 L829,444 L825,345 L850,345 L894,345 L894,383" fill="none" stroke="#020609" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+<path d="M771,444 L829,444 L825,345 L850,345 L894,345 L894,383" fill="none" stroke="#7b4397" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M515,456 L515,495 L476,525 L451,552 L421,570" fill="none" stroke="#020609" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+<path d="M515,456 L515,495 L476,525 L451,552 L421,570" fill="none" stroke="#b5bd00" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M97,198 L95,169 L112,82 L111,137 L139,164 L168,204 L210,215 L363,217 L365,282 L481,389 L566,409 L600,378 L659,340 L712,320 L748,286 L748,255 L731,220 L694,190 L620,169 L668,143 L676,116 L700,59 L746,59 L792,59 L838,59 L884,59 L930,59" fill="none" stroke="#020609" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+<path d="M97,198 L95,169 L112,82 L111,137 L139,164 L168,204 L210,215 L363,217 L365,282 L481,389 L566,409 L600,378 L659,340 L712,320 L748,286 L748,255 L731,220 L694,190 L620,169 L668,143 L676,116 L700,59 L746,59 L792,59 L838,59 L884,59 L930,59" fill="none" stroke="#9a3820" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M515,456 L566,421 L600,378 L558,318 L618,220 L620,169 L620,116 L625,93 L582,59 L530,59 L489,59 L443,59 L397,59 L356,59" fill="none" stroke="#020609" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+<path d="M515,456 L566,421 L600,378 L558,318 L618,220 L620,169 L620,116 L625,93 L582,59 L530,59 L489,59 L443,59 L397,59 L356,59" fill="none" stroke="#5eb6e4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M515,456 L566,421 L600,378 L558,318 L618,220 L620,169 L620,116 L625,93 L582,59 L530,59 L489,59 L443,59 L397,59 L340,84" fill="none" stroke="#020609" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+<path d="M515,456 L566,421 L600,378 L558,318 L618,220 L620,169 L620,116 L625,93 L582,59 L530,59 L489,59 L443,59 L397,59 L340,84" fill="none" stroke="#5eb6e4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M620,169 L620,116 L620,92 L582,59" fill="none" stroke="#020609" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+<path d="M620,169 L620,116 L620,92 L582,59" fill="none" stroke="#5eb6e4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M439,424 L424,383 L400,329 L365,282 L363,217 L317,259 L222,382 L192,445" fill="none" stroke="#020609" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+<path d="M439,424 L424,383 L400,329 L365,282 L363,217 L317,259 L222,382 L192,445" fill="none" stroke="#f7943e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M439,424 L424,383 L317,259 L145,421 L181,391" fill="none" stroke="#020609" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+<path d="M439,424 L424,383 L317,259 L145,421 L181,391" fill="none" stroke="#00888a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M222,382 L260,355" fill="none" stroke="#020609" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+<path d="M222,382 L260,355" fill="none" stroke="#e86a9f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="209" cy="215" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TSW"/>
+<text x="215" y="209" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tsuen Wan</text>
+<circle cx="247" cy="215" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TWH"/>
+<text x="253" y="209" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tai Wo Hau</text>
+<circle cx="285" cy="215" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="KWH"/>
+<text x="291" y="209" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Kwai Hing</text>
+<circle cx="324" cy="215" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="KWF"/>
+<text x="330" y="209" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Kwai Fong</text>
+<circle cx="363" cy="217" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="LAK"/>
+<text x="369" y="211" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Lai King</text>
+<circle cx="363" cy="217" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="MEF"/>
+<text x="369" y="211" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Mei Foo</text>
+<circle cx="399" cy="219" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="LCK"/>
+<text x="405" y="213" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Lai Chi Kok</text>
+<circle cx="440" cy="219" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="CSW"/>
+<text x="446" y="213" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Cheung Sha Wan</text>
+<circle cx="478" cy="219" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="SSP"/>
+<text x="484" y="213" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Sham Shui Po</text>
+<circle cx="515" cy="247" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="PRE"/>
+<text x="521" y="241" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Prince Edward</text>
+<circle cx="515" cy="277" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="MOK"/>
+<text x="521" y="271" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Mong Kok</text>
+<circle cx="515" cy="310" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="YMT"/>
+<text x="521" y="304" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Yau Ma Tei</text>
+<circle cx="515" cy="344" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="JOR"/>
+<text x="521" y="338" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Jordan</text>
+<circle cx="515" cy="378" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TST"/>
+<text x="521" y="372" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tsim Sha Tsui</text>
+<circle cx="515" cy="456" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="ADM"/>
+<text x="521" y="450" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Admiralty</text>
+<circle cx="438" cy="456" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="CEN"/>
+<text x="444" y="450" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Central</text>
+<circle cx="245" cy="444" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="KET"/>
+<text x="251" y="438" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Kennedy Town</text>
+<circle cx="294" cy="444" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="HKU"/>
+<text x="300" y="438" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">HKU</text>
+<circle cx="341" cy="444" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="SYP"/>
+<text x="347" y="438" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Sai Ying Pun</text>
+<circle cx="389" cy="444" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="SHW"/>
+<text x="395" y="438" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Sheung Wan</text>
+<circle cx="566" cy="444" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="WAC"/>
+<text x="572" y="438" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Wan Chai</text>
+<circle cx="611" cy="444" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="CAB"/>
+<text x="617" y="438" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Causeway Bay</text>
+<circle cx="662" cy="444" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TIH"/>
+<text x="668" y="438" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tin Hau</text>
+<circle cx="716" cy="444" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="FOH"/>
+<text x="722" y="438" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Fortress Hill</text>
+<circle cx="771" cy="444" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="NOP"/>
+<text x="765" y="438" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">North Point</text>
+<circle cx="829" cy="444" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="QUB"/>
+<text x="823" y="438" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Quarry Bay</text>
+<circle cx="865" cy="461" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TAK"/>
+<text x="859" y="455" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tai Koo</text>
+<circle cx="898" cy="486" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="SWH"/>
+<text x="892" y="480" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Sai Wan Ho</text>
+<circle cx="930" cy="511" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="SKW"/>
+<text x="924" y="505" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Shau Kei Wan</text>
+<circle cx="930" cy="548" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="HFC"/>
+<text x="924" y="542" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Heng Fa Chuen</text>
+<circle cx="930" cy="575" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="CHW"/>
+<text x="924" y="569" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Chai Wan</text>
+<circle cx="850" cy="345" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TIK"/>
+<text x="844" y="339" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tiu Keng Leng</text>
+<circle cx="825" cy="345" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="YAT"/>
+<text x="819" y="339" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Yau Tong</text>
+<circle cx="825" cy="319" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="LAT"/>
+<text x="819" y="313" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Lam Tin</text>
+<circle cx="825" cy="289" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="KWT"/>
+<text x="819" y="283" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Kwun Tong</text>
+<circle cx="825" cy="260" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="NTK"/>
+<text x="819" y="254" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Ngau Tau Kok</text>
+<circle cx="792" cy="220" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="KOB"/>
+<text x="786" y="214" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Kowloon Bay</text>
+<circle cx="760" cy="220" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="CHH"/>
+<text x="766" y="214" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Choi Hung</text>
+<circle cx="731" cy="220" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="DIH"/>
+<text x="737" y="214" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Diamond Hill</text>
+<circle cx="694" cy="220" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="WTS"/>
+<text x="700" y="214" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Wong Tai Sin</text>
+<circle cx="655" cy="220" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="LOF"/>
+<text x="661" y="214" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Lok Fu</text>
+<circle cx="618" cy="220" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="KOT"/>
+<text x="624" y="214" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Kowloon Tong</text>
+<circle cx="577" cy="220" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="SKM"/>
+<text x="583" y="214" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Shek Kip Mei</text>
+<circle cx="659" cy="340" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="HOM"/>
+<text x="665" y="334" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Ho Man Tin</text>
+<circle cx="693" cy="363" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="WHA"/>
+<text x="699" y="357" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Whampoa</text>
+<circle cx="894" cy="345" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TKO"/>
+<text x="888" y="339" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tseung Kwan O</text>
+<circle cx="932" cy="292" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="HAH"/>
+<text x="926" y="286" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Hang Hau</text>
+<circle cx="932" cy="250" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="POA"/>
+<text x="926" y="244" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Po Lam</text>
+<circle cx="894" cy="383" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="LHP"/>
+<text x="888" y="377" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">LOHAS Park</text>
+<circle cx="515" cy="495" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="OCP"/>
+<text x="521" y="489" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Ocean Park</text>
+<circle cx="476" cy="525" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="WCH"/>
+<text x="482" y="519" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Wong Chuk Hang</text>
+<circle cx="451" cy="552" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="LET"/>
+<text x="457" y="546" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Lei Tung</text>
+<circle cx="421" cy="570" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="SOH"/>
+<text x="427" y="564" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">South Horizons</text>
+<circle cx="97" cy="198" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TUM"/>
+<text x="103" y="192" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tuen Mun</text>
+<circle cx="95" cy="169" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="SIH"/>
+<text x="101" y="163" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Siu Hong</text>
+<circle cx="112" cy="82" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TIS"/>
+<text x="118" y="76" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tin Shui Wai</text>
+<circle cx="111" cy="137" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="LOP"/>
+<text x="117" y="131" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Long Ping</text>
+<circle cx="139" cy="164" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="YUL"/>
+<text x="145" y="158" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Yuen Long</text>
+<circle cx="168" cy="204" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="KSR"/>
+<text x="174" y="198" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Kam Sheung Road</text>
+<circle cx="210" cy="215" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TWW"/>
+<text x="216" y="209" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tsuen Wan West</text>
+<circle cx="365" cy="282" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="NAC"/>
+<text x="371" y="276" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Nam Cheong</text>
+<circle cx="481" cy="389" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="AUS"/>
+<text x="487" y="383" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Austin</text>
+<circle cx="566" cy="409" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="ETS"/>
+<text x="572" y="403" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">East Tsim Sha Tsui</text>
+<circle cx="600" cy="378" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="HUH"/>
+<text x="606" y="372" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Hung Hom</text>
+<circle cx="712" cy="320" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TKW"/>
+<text x="718" y="314" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">To Kwa Wan</text>
+<circle cx="748" cy="286" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="SUW"/>
+<text x="754" y="280" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Sung Wong Toi</text>
+<circle cx="748" cy="255" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="KAT"/>
+<text x="754" y="249" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Kai Tak</text>
+<circle cx="694" cy="190" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="HIK"/>
+<text x="700" y="184" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Hin Keng</text>
+<circle cx="620" cy="169" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TAW"/>
+<text x="626" y="163" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tai Wai</text>
+<circle cx="668" cy="143" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="CKT"/>
+<text x="674" y="137" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Che Kung Temple</text>
+<circle cx="676" cy="116" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="STW"/>
+<text x="682" y="110" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Sha Tin Wai</text>
+<circle cx="700" cy="59" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="CIO"/>
+<text x="706" y="53" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">City One</text>
+<circle cx="746" cy="59" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="SHM"/>
+<text x="752" y="53" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Shek Mun</text>
+<circle cx="792" cy="59" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TSH"/>
+<text x="786" y="53" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tai Shui Hang</text>
+<circle cx="838" cy="59" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="HEO"/>
+<text x="832" y="53" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Heng On</text>
+<circle cx="884" cy="59" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="MOS"/>
+<text x="878" y="53" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Ma On Shan</text>
+<circle cx="930" cy="59" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="WKS"/>
+<text x="924" y="53" text-anchor="end" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Wu Kai Sha</text>
+<circle cx="566" cy="421" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="EXC"/>
+<text x="572" y="415" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Exhibition Centre</text>
+<circle cx="558" cy="318" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="MKK"/>
+<text x="564" y="312" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Mong Kok East</text>
+<circle cx="620" cy="116" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="SHT"/>
+<text x="626" y="110" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Sha Tin</text>
+<circle cx="625" cy="93" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="FOT"/>
+<text x="631" y="87" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Fo Tan</text>
+<circle cx="582" cy="59" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="UNI"/>
+<text x="588" y="53" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">University</text>
+<circle cx="530" cy="59" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TAP"/>
+<text x="536" y="53" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tai Po Market</text>
+<circle cx="489" cy="59" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TWO"/>
+<text x="495" y="53" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tai Wo</text>
+<circle cx="443" cy="59" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="FAN"/>
+<text x="449" y="53" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Fanling</text>
+<circle cx="397" cy="59" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="SHS"/>
+<text x="403" y="53" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Sheung Shui</text>
+<circle cx="356" cy="59" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="LOW"/>
+<text x="362" y="53" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Lo Wu</text>
+<circle cx="340" cy="84" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="LMC"/>
+<text x="346" y="78" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Lok Ma Chau</text>
+<circle cx="620" cy="92" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="RAC"/>
+<text x="626" y="86" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Racecourse</text>
+<circle cx="439" cy="424" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="HOK"/>
+<text x="445" y="418" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Hong Kong</text>
+<circle cx="424" cy="383" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="KOW"/>
+<text x="430" y="377" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Kowloon</text>
+<circle cx="400" cy="329" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="OLY"/>
+<text x="406" y="323" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Olympic</text>
+<circle cx="317" cy="259" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TSY"/>
+<text x="323" y="253" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tsing Yi</text>
+<circle cx="222" cy="382" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="SUN"/>
+<text x="228" y="376" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Sunny Bay</text>
+<circle cx="192" cy="445" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="TUC"/>
+<text x="198" y="439" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Tung Chung</text>
+<circle cx="145" cy="421" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="AIR"/>
+<text x="151" y="415" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Airport</text>
+<circle cx="181" cy="391" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="AWE"/>
+<text x="187" y="385" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">AsiaWorld-Expo</text>
+<circle cx="260" cy="355" r="4.2" fill="#f5f8fa" stroke="#071116" stroke-width="1.6" data-code="DIS"/>
+<text x="266" y="349" text-anchor="start" fill="#d8e1e8" font-family="system-ui,sans-serif" font-size="7.2" paint-order="stroke" stroke="#071116" stroke-width="2.4">Disneyland Resort</text>
+</svg>

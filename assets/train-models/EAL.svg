@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 86">
+<defs><filter id="s"><feDropShadow dx="0" dy="3" stdDeviation="2" flood-opacity=".35"/></filter></defs>
+<g filter="url(#s)" stroke-linejoin="round">
+<ellipse cx="108" cy="73" rx="92" ry="8" fill="#000" opacity=".22"/>
+<polygon points="25,20 65,8 76,15 33,28" fill="#d6dadd" stroke="#7c878d" stroke-width="1"/>
+<polygon points="33,28 76,15 76,56 33,67" fill="#bfc5c9" stroke="#7c878d" stroke-width="1"/>
+<polygon points="25,20 33,28 33,67 21,58 21,29" fill="#aeb6bb" stroke="#7c878d" stroke-width="1"/>
+<polygon points="37,18 52,9 62,13 46,22" fill="#a8adb0"/>
+<polygon points="38,33 46,31 46,46 38,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="48,33 56,31 56,46 48,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="58,33 66,31 66,46 58,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="34,52 75,40 75,45 34,57" fill="#5eb6e4"/>
+<polygon points="23,31 31,34 31,49 23,46" fill="#14232b"/>
+<rect x="23" y="53" width="3" height="2" rx="1" fill="#ffcf45"/><rect x="28" y="55" width="3" height="2" rx="1" fill="#ffcf45"/>
+<polygon points="83,20 123,8 134,15 91,28" fill="#d6dadd" stroke="#7c878d" stroke-width="1"/>
+<polygon points="91,28 134,15 134,56 91,67" fill="#bfc5c9" stroke="#7c878d" stroke-width="1"/>
+<polygon points="95,18 110,9 120,13 104,22" fill="#a8adb0"/>
+<polygon points="96,33 104,31 104,46 96,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="106,33 114,31 114,46 106,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="116,33 124,31 124,46 116,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="92,52 133,40 133,45 92,57" fill="#5eb6e4"/>
+<polygon points="141,20 181,8 192,15 149,28" fill="#d6dadd" stroke="#7c878d" stroke-width="1"/>
+<polygon points="149,28 192,15 192,56 149,67" fill="#bfc5c9" stroke="#7c878d" stroke-width="1"/>
+<polygon points="153,18 168,9 178,13 162,22" fill="#a8adb0"/>
+<polygon points="154,33 162,31 162,46 154,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="164,33 172,31 172,46 164,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="174,33 182,31 182,46 174,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="150,52 191,40 191,45 150,57" fill="#5eb6e4"/>
+<path d="M18 60 L183 25" stroke="#fff" stroke-width="1.4" opacity=".65"/>
+</g>
+<title>East Rail set — representative R-train-style visual</title>
+</svg>

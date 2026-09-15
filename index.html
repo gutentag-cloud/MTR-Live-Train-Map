@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hong Kong Live Train Operations Display</title><link rel="stylesheet" href="styles.css"></head>
+<title>Hong Kong Live Train Operations Display v13.3</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="v12.css"><link rel="stylesheet" href="workspace.css"></head>
 <body><div id="app">
 <header class="topbar">
-  <div class="brand"><div class="pulse"></div><div><strong>HK Train Operations</strong><span>Telemetry · official ETA fusion · WTT/GeoTD fallback</span></div></div>
+  <div class="brand"><div class="pulse"></div><div><strong>Hong Kong, by rail</strong><span>Follow the network. Find your next train.</span></div></div>
   <div class="clockblock"><span id="clock">--:--:--</span><small>Hong Kong time</small></div>
   <div class="controls">
     <label>Schedule<select id="profile"></select></label>
@@ -15,9 +15,14 @@
 </header>
 <main class="layout">
   <section class="map-panel">
-    <div class="statusrow"><div><span class="badge">SCHEDULE SIMULATION</span><span id="profileStatus"></span></div><div class="map-actions"><span id="mapResolution" class="map-res">GeoTD 6K</span><a class="map-source-link" href="assets/GeoTD.pdf" target="_blank" rel="noopener" title="Open original vector GeoTD PDF">Vector PDF</a><button id="zoomOut">−</button><button id="resetMap">Reset</button><button id="zoomIn">+</button></div></div>
+    <div class="statusrow"><div><span class="badge">NETWORK</span><span id="profileStatus"></span></div><div class="map-actions"><div class="map-mode-switch" aria-label="Map mode"><button data-map-mode="geotd" class="active">GeoTD</button><button data-map-mode="geo">Direct map</button><button data-map-mode="schematic">Vector schematic</button><button data-map-mode="official">Official MTR</button></div><button id="fleetBtn" class="v11-mini">Fleet</button><span id="mapResolution" class="map-res">GeoTD Preview</span><a class="map-source-link" href="assets/GeoTD.pdf" target="_blank" rel="noopener" title="Open original vector GeoTD PDF">Vector PDF</a><button id="zoomOut">−</button><button id="resetMap">Reset</button><button id="zoomIn">+</button></div></div>
     <div id="mapViewport" class="map-viewport" tabindex="0" aria-label="Interactive train map. Drag to pan and use wheel or zoom buttons to zoom.">
-      <div id="mapWorld" class="map-world"><img id="mapImage" src="assets/geotd-map-6000.png" data-res="6K" width="6000" height="5455" loading="eager" decoding="async" alt="Hong Kong geographic railway track diagram, high-resolution GeoTD"><div id="markers" class="markers"></div></div>
+      <div id="mapWorld" class="map-world"><img id="mapImage" src="assets/geotd-map-preview.webp" data-res="Preview" width="3200" height="2910" loading="eager" decoding="async" alt="Hong Kong geographic railway track diagram, high-resolution GeoTD"><div id="geotdStationHotspots" class="geotd-station-hotspots"></div><div id="markers" class="markers"></div></div>
+      <div id="geoMap" class="v11-map-pane hidden" aria-label="Direct geographic railway map following public MTR route geometry"></div>
+      <div id="schematicPane" class="v11-map-pane hidden"><div id="schematicViewport" class="v12-screen-viewport"><div id="schematicWorld" class="v12-screen-world"><svg id="schematicSvg" class="v12-clean-schematic" viewBox="0 0 1000 586" preserveAspectRatio="xMidYMid meet" aria-label="Clean MTR vector schematic"></svg><div id="schematicStations" class="v12-screen-stations"></div><div id="schematicMarkers" class="v12-screen-markers"></div></div></div><div class="screen-controls"><button id="schOut">−</button><button id="schReset">Reset</button><button id="schIn">+</button></div></div>
+      <div id="officialMapPane" class="v11-map-pane hidden"><div id="officialViewport" class="v12-screen-viewport"><div id="officialWorld" class="v12-screen-world"><img class="official-map-img" data-src="/api/map/official-system" alt="Official MTR system map"><div id="officialStations" class="v12-screen-stations"></div><div id="officialMarkers" class="v12-screen-markers"></div></div></div><div class="screen-controls"><button id="offOut">−</button><button id="offReset">Reset</button><button id="offIn">+</button></div><div class="official-note"><b>Official MTR system map + route-snapped train dots</b><span>The background is proxied from MTR. This view is schematic; use Direct map for geographic railway alignment.</span><a href="https://www.mtr.com.hk/en/customer/services/system_map.html" target="_blank" rel="noopener">MTR system map ↗</a></div></div>
+      <div id="radarControl" class="radar-control hidden"><button id="radarToggle">Radar off</button><button id="radarPlay">▶</button><input id="radarOpacity" type="range" min="10" max="90" value="55"><span id="radarStatus">HKO radar</span></div>
+      <div id="stationQuick" class="station-quick hidden"></div>
     </div>
     <div class="timeline"><input id="timeRange" type="range" min="14400" max="100800" step="30"><div><span>04:00</span><strong id="simTime">--:--:--</strong><span>28:00</span></div></div>
     <div id="legend" class="legend"></div>
@@ -26,7 +31,7 @@
     <div class="summary"><div><b id="activeCount">0</b><span>active trains</span></div><div><b id="sourceCount">0</b><span>source trips</span></div></div>
     <div class="sideTabs"><button id="trainsTab" class="active">Trains</button><button id="boardTab">Board</button><button id="opsTab">Operations</button></div>
     <div id="trainPane">
-      <div id="warningBox" class="warning"></div>
+      <details class="coverage-notes"><summary>Timetable coverage notes</summary><div id="warningBox" class="warning"></div></details>
       <div class="filterHead"><strong>Lines</strong><button id="allLines">All</button></div><div id="lineFilters" class="lineFilters"></div>
       <label class="search"><span>Find train</span><input id="search" placeholder="Trip / train no."></label>
       <div id="trainList" class="trainList"></div>
@@ -41,16 +46,16 @@
       <div id="predictionSummary" class="predictionSummary"></div>
       <div class="departureHead"><span>Destination / train</span><span>Expected</span></div>
       <div id="departureBoard" class="departureBoard"></div>
-      <div class="boardFoot">LIVE ETA rows use the official MTR timestamp directly. HISTORY PRED rows extrapolate the recorded delay trend and remain estimates. All countdowns update to the second.</div>
+      <div class="boardFoot">Arrival times are estimates. Official ETA provides the arrival window; timetable and delay history refine the countdown.</div>
     </div>
     <div id="opsPane" class="hidden">
       <div class="opsHead"><strong>Network operations</strong><span id="historyStatus">History starting…</span></div>
       <div id="opsCards" class="opsCards"></div>
       <div id="opsAlerts" class="opsAlerts"></div>
       <div class="opsTableWrap"><table class="opsTable"><thead><tr><th>Line</th><th>Active</th><th>Source</th><th>Delay</th><th>+10m</th><th>Trend</th></tr></thead><tbody id="opsTableBody"></tbody></table></div>
-      <div class="opsFoot">Headway alerts use projected common-terminal gaps from currently active trips. Telemetry/ETA/WTT confidence is shown separately.</div>
+      <div class="opsFoot">Headway alerts use projected common-terminal gaps. v13.1 also reports ETA discontinuities absorbed by the anti-jump filter and EAL6240P post-control-point-hours workings.</div>
     </div>
   </aside>
 </main>
 <div id="detail" class="detail detail-wide hidden"><button id="closeDetail">×</button><div id="detailBody"></div></div>
-</div><script src="config.js"></script><script src="data.js"></script><script src="app.js"></script></body></html>
+</div><div id="fleetModal" class="fleet-modal hidden"><div class="fleet-shell"><button id="fleetClose">×</button><h2>Representative rolling-stock models</h2><p>Original v12 vector illustrations used as line-default visuals. They are representative, not a claim of exact train-set assignment for a particular run.</p><div id="fleetGrid"></div></div></div><script defer src="train_models.js"></script><script defer src="data.js"></script><script defer src="v12_geo_data.js"></script><script defer src="v12_geotd_detail.js"></script><script defer src="app.js"></script><script defer src="v12.js"></script></body></html>

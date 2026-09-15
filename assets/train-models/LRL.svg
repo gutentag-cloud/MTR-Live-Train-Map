@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 86">
+<defs><filter id="s"><feDropShadow dx="0" dy="3" stdDeviation="2" flood-opacity=".35"/></filter></defs>
+<g filter="url(#s)" stroke-linejoin="round">
+<ellipse cx="108" cy="73" rx="92" ry="8" fill="#000" opacity=".22"/>
+<polygon points="25,20 93,8 104,15 33,28" fill="#d6dadd" stroke="#7c878d" stroke-width="1"/>
+<polygon points="33,28 104,15 104,56 33,67" fill="#bfc5c9" stroke="#7c878d" stroke-width="1"/>
+<polygon points="25,20 33,28 33,67 21,58 21,29" fill="#aeb6bb" stroke="#7c878d" stroke-width="1"/>
+<polygon points="37,18 80,9 90,13 46,22" fill="#a8adb0"/>
+<polygon points="38,33 46,31 46,46 38,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="48,33 56,31 56,46 48,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="58,33 66,31 66,46 58,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="68,33 76,31 76,46 68,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="78,33 86,31 86,46 78,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="34,52 103,40 103,45 34,57" fill="#d6a400"/>
+<polygon points="23,31 31,34 31,49 23,46" fill="#14232b"/>
+<rect x="23" y="53" width="3" height="2" rx="1" fill="#ffcf45"/><rect x="28" y="55" width="3" height="2" rx="1" fill="#ffcf45"/>
+<polygon points="111,20 179,8 190,15 119,28" fill="#d6dadd" stroke="#7c878d" stroke-width="1"/>
+<polygon points="119,28 190,15 190,56 119,67" fill="#bfc5c9" stroke="#7c878d" stroke-width="1"/>
+<polygon points="123,18 166,9 176,13 132,22" fill="#a8adb0"/>
+<polygon points="124,33 132,31 132,46 124,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="134,33 142,31 142,46 134,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="144,33 152,31 152,46 144,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="154,33 162,31 162,46 154,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="164,33 172,31 172,46 164,48" fill="#1e2d36" stroke="#75838b" stroke-width=".6"/>
+<polygon points="120,52 189,40 189,45 120,57" fill="#d6a400"/>
+</g>
+<title>Light Rail vehicle — representative LRV-style visual</title>
+</svg>

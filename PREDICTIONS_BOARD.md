@@ -1,3 +1,5 @@
+> **v13.3 note:** the old direct timestamp below is no longer treated as independently second-accurate. v13.3 keeps the MTR ETA as the live time window and estimates the displayed second phase from the matched WTT timing point plus the live line-delay model. See `V13_3_FEATURES.md`.
+
 # v10 delay prediction and second-accurate station board
 
 ## Historical delay predictor

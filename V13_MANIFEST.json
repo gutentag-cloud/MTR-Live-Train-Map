@@ -1,0 +1,41 @@
+{
+  "release": "13.0",
+  "files": {
+    "index.html": {
+      "bytes": 8006,
+      "sha256": "e1750a4565c7c69789dcbe37a905ad2ccc4df52faac2ab65d40e1b250cf528c0"
+    },
+    "app.js": {
+      "bytes": 63550,
+      "sha256": "3ea84722eef2be377152b1599f95c655f889806c62af48a751717ea295bf8d57"
+    },
+    "v12.js": {
+      "bytes": 30104,
+      "sha256": "20829a2acf4f381f80aaa74a9f50c3769775118e7948199f299e2049fa15a312"
+    },
+    "v12_backend.py": {
+      "bytes": 13174,
+      "sha256": "579e11efefcf53055d56c5ddd4c538b1da987e62f06dc92653b57d632a14a1c8"
+    },
+    "serve_live.py": {
+      "bytes": 40730,
+      "sha256": "18cec691f10f98754cbb0c6547032edaa60c38163063269f4bd9f524ba7eb36e"
+    },
+    "README.md": {
+      "bytes": 1818,
+      "sha256": "99ec0562261b5fadd29a13d09544973222e5051c0563bfd6129f6a2a5993bd5e"
+    },
+    "V13_FEATURES.md": {
+      "bytes": 2682,
+      "sha256": "a8762beceb5a05318d95625f900d556ea0d161b940a16f61559aad31a61fffd1"
+    },
+    "QA_V13.md": {
+      "bytes": 1766,
+      "sha256": "9d18b03952d9c8395fdec5ba754a9b2efd4d1884b1111880abb412818883904f"
+    },
+    "THIRD_PARTY_SOURCES.md": {
+      "bytes": 1406,
+      "sha256": "8320cbe2eb7e92b6d2d4e330056fc5b9624dd50aba1475aab77c49c1720b28b3"
+    }
+  }
+}

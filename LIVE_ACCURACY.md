@@ -34,7 +34,7 @@ Markers are explicitly labelled **arrival-inferred**, and displayed speed is mod
 
 ## Fallback
 
-If a live feed is unavailable, unmatched trains remain on the original timetable simulation. Scrubbing away from Now or using accelerated simulation also disables live correction because a real-time feed cannot represent a historical/future simulated clock.
+For heavy rail, if a live feed is unavailable, unmatched trains remain on the original timetable simulation. In the v12.2 Light Rail map, unmatched/no-ETA Light Rail trains are intentionally hidden rather than displayed as WTT fallback markers. Scrubbing away from Now or using accelerated simulation also disables live correction because a real-time feed cannot represent a historical/future simulated clock.
 
 
 ## v8 WTT fallback hardening
@@ -58,3 +58,8 @@ The richer fields in v9.2 are derived conservatively:
 Heavy-rail ETA requests are made concurrently. A cold start first requests two bootstrap anchors per line and publishes that partial solution before the full strategic-station sweep completes. During later refresh cycles the previous complete solution stays active until the new full sweep is ready. Each station has an independent 120-second cache and each upstream request has a 2.5-second timeout. This keeps one slow station from blocking or clearing the rest of the network.
 
 The browser ages ETA using the server's actual `fetched_at` timestamp; repeatedly polling a stale cached response no longer resets the freshness clock.
+
+
+## v12.2 Light Rail display rule
+
+Light Rail train markers are visible only when the current official public Light Rail arrival feed is fresh and the observation can be matched to a WTT working. No ETA match means no Light Rail train marker. This is a display-conservatism choice; it avoids presenting schedule-only vehicles as if they were live.
