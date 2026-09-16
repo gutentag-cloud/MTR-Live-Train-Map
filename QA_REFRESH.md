@@ -28,3 +28,20 @@
 Light Rail locations remain ETA/timetable estimates, not GPS. The timetable does not supply a guaranteed live vehicle-to-route identity. The official schematic still uses approximate regional calibration followed by route-pixel snapping; it cannot establish exact route identity at a junction. External feed availability and supplied timetable coverage remain dependencies.
 
 Rebuild generated assets with `python3 tools/build_web_assets.py` (Pillow required).
+
+## Arrival-board update
+
+- Removed modulo-minute substitution of timetable seconds. A modeled time now requires a fresh medium/high live line-delay estimate, a matching terminal, a distinct timetable event, and agreement within 30 seconds of official ETA. Ambiguous matches retain the official estimate; no improvement in measured arrival accuracy is claimed.
+- Shared display formatting shows official estimates to the minute and prefixes model predictions with ≈. Raw seconds are available via a comparison toggle.
+- Added quick-board direction filter, user-selected platform walking time, approximate same-platform service gaps, per-row observation ages, manual refresh, and up to 12 locally saved stations.
+- Prevented old station responses from replacing another station's board; excluded stale quick-board rows. The quick board uses live HKT independently of simulation/replay.
+- Tests: eight Python regression cases, arrival-formatting checks, JavaScript syntax checks. Browser verified live model/official rows, UP filter, 5-minute walking check, raw timestamps, saved-station persistence and no console errors in checked flows.
+- Source: MTR Next Train Data Dictionary v1.7 describes the time field as estimated arrival/departure time; its HH:mm:ss representation does not establish one-second prediction accuracy: https://opendata.mtr.com.hk/doc/Next_Train_DataDictionary_v1.7.pdf
+
+## Full GeoTD and exploration controls
+
+- Full 12000 × 10910 PNG is the default quality; lightweight preview remains visible while decoding. Automatic quality can be selected explicitly.
+- Added station-name/code search with map centering, optional station labels, focus mode, double-click zoom, and keyboard map controls (+/−, arrows, 0 to fit; / to search; Escape to close details).
+- Increased maximum GeoTD zoom to 16×. Main-map pan/wheel handlers no longer intercept controls or other map views.
+- Verified full image intrinsic dimensions in browser, automatic-quality switching, station lookup, label toggle, focus enter/exit, and 390px layout without horizontal overflow.
+- Existing eight Python tests, 360 geometry samples, arrival-format tests and JS syntax checks pass.

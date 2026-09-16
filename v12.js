@@ -11,6 +11,8 @@ let geoMarkers=new Map(), screenMarkers={schematic:new Map(),official:new Map()}
 const directGeo={lines:new Map(),graphs:new Map(),segments:new Map(),loading:false,loaded:0,failed:0,osmWays:[],tceCurrent:null,tceSource:null};
 let officialRaster=null,officialBuckets={},officialReady=false,schematicBuilt=false;
 const polyMetricCache=new WeakMap(),geoPathCache=new Map(),screenPathCache=new Map();let quickLastSec=-1;
+let quickDirection='',quickWalk=0,quickRaw=false,quickRequest=0;
+let savedStations=[];try{savedStations=JSON.parse(localStorage.getItem('mtr.savedStations')||'[]').filter(c=>typeof c==='string'&&G.stations[c]).slice(0,12)}catch{}
 let quickCode=null,quickObs=[],quickError='',quickFetchAt=0,quickTimer=null;
 let radarMeta=null,radarOn=false,radarPlaying=false,radarIndex=0,radarTimer=null;
 const screenState={schematic:{scale:1,x:0,y:0,fit:true},official:{scale:1,x:0,y:0,fit:true}};
@@ -158,15 +160,15 @@ function updateGeoTrains(states){
 // ---------- station ETA quick board ----------
 function servingLines(code){return G.stationLines?.[code]||runtime.stationLines?.[code]||[]}
 async function fetchQuick(){
-  if(!quickCode)return;const code=quickCode,lines=servingLines(code);if(!lines.length){quickError='No supported live lines at this station';quickObs=[];renderQuick();return}
-  try{let u='/api/station-board?station='+encodeURIComponent(code)+'&lines='+encodeURIComponent(lines.join(','));let j=await(await apiFetch(u)).json();if(code!==quickCode)return;if(!j.ok)throw new Error(j.error||'station board unavailable');quickObs=j.observations||[];quickFetchAt=Date.now();quickError='';}
-  catch(e){if(code===quickCode)quickError=String(e?.message||e)}renderQuick();
+  if(!quickCode)return;const code=quickCode,request=++quickRequest,lines=servingLines(code);if(!lines.length){quickError='No supported live lines at this station';quickObs=[];renderQuick();return}
+  try{let u='/api/station-board?station='+encodeURIComponent(code)+'&lines='+encodeURIComponent(lines.join(','));let j=await(await apiFetch(u)).json();if(code!==quickCode||request!==quickRequest)return;if(!j.ok)throw new Error(j.error||'station board unavailable');quickObs=j.observations||[];quickFetchAt=Date.now();quickError='';}
+  catch(e){if(code===quickCode&&request===quickRequest)quickError=String(e?.message||e)}renderQuick();
 }
 function setActiveGeoTDStation(code){
   $$('.v12-geotd-hotspot').forEach(x=>x.classList.toggle('active',x.dataset.station===code));
 }
 function openStationQuick(code){
-  quickCode=code;quickObs=[];quickError='Loading official ETA…';
+  quickCode=code;quickDirection='';quickFetchAt=0;quickObs=[];quickError='Loading official ETA…';
   setActiveGeoTDStation(code);
   $('#stationQuick').classList.remove('hidden');
   // Open the full Board at the same time. It combines direct MTR ETA with the
@@ -176,20 +178,46 @@ function openStationQuick(code){
   renderQuick();fetchQuick();clearInterval(quickTimer);quickTimer=setInterval(fetchQuick,8000)
 }
 function closeQuick(){quickCode=null;setActiveGeoTDStation(null);clearInterval(quickTimer);quickTimer=null;$('#stationQuick')?.classList.add('hidden')}
-function renderQuick(){
-  const box=$('#stationQuick');if(!box||!quickCode)return;const st=G.stations[quickCode]||D.stations[quickCode],now=runtime.simSec||0;
-  const etaOf=o=>o.estimated_eta_sec??o.eta_sec;
-  const rows=(quickObs||[]).filter(o=>etaOf(o)>=now-30).sort((a,b)=>etaOf(a)-etaOf(b)).slice(0,10);
-  let h=`<button class="sq-close" title="Close">×</button><h3>${esc(st?.name||quickCode)}</h3><div class="sq-sub">Estimated station times · HKT · MTR live ETA window + WTT seconds</div>`;
-  if(quickError)h+=`<div class="sq-note">${esc(quickError)}${window.V12_OPEN_STATION?' · The full board remains available with ETA-corrected/WTT fallback.':''}</div>`;
-  if(!rows.length&&!quickError)h+='<div class="sq-note">No direct arrivals returned in the current API window.</div>';
-  for(const o of rows){const col=D.lines[o.line]?.color||'#889',dest=(G.stations[o.dest]?.name||D.stations[o.dest]?.name||o.dest||'—'),eta=etaOf(o),d=eta-now,src=o.estimated?'EST':'API';h+=`<div class="sq-row" title="${esc(o.estimate_source||'MTR Next Train API')}"><i style="background:${col}"></i><div><b>${esc(o.line)} · ${esc(dest)}</b><span>${esc(o.direction||'')} ${o.platform?`· platform ${esc(o.platform)}`:''} · ${src}</span></div><time>${fmt(eta)}<small>${fmtCountdown(d)}</small></time></div>`}
-  h+=`<button class="sq-full">Open full station board</button><div class="sq-note">Seconds are <b>estimated</b>, not claimed as one-second MTR ground truth. The live MTR ETA fixes the arrival window; WTT timing seconds and the current live line-delay model refine the second phase.</div>`;box.innerHTML=h;
-  box.querySelector('.sq-close')?.addEventListener('click',closeQuick);box.querySelector('.sq-full')?.addEventListener('click',()=>{(window.V12_OPEN_STATION||window.V11_OPEN_STATION)?.(quickCode);closeQuick()});
+function renderSavedStations(){
+ const box=$('#savedStations');if(!box)return;
+ box.innerHTML='<span>Saved stops</span>'+savedStations.map(c=>`<button data-stop="${esc(c)}">${esc(G.stations[c]?.name||c)}</button>`).join('')+(savedStations.length?'':'<small>Open a station and choose Save station.</small>');
+ box.querySelectorAll('[data-stop]').forEach(b=>b.onclick=()=>openStationQuick(b.dataset.stop));
 }
+function renderQuick(){
+ const box=$('#stationQuick');if(!box||!quickCode)return;
+ if(box.contains(document.activeElement)&&/SELECT|INPUT/.test(document.activeElement.tagName))return;
+ const st=G.stations[quickCode]||D.stations[quickCode],now=window.ArrivalDisplay.now(),A=window.ArrivalDisplay;
+ const etaOf=o=>quickRaw?o.eta_sec:(o.estimated_eta_sec??o.eta_sec);
+ const fresh=(quickObs||[]).filter(o=>A.age(o,quickFetchAt)<=60);
+ const rows=fresh.filter(o=>etaOf(o)>=now-30&&(!quickDirection||o.direction===quickDirection)).sort((a,b)=>etaOf(a)-etaOf(b)).slice(0,16);
+ const age=quickFetchAt?Math.floor((Date.now()-quickFetchAt)/1000):null;
+ let h=`<button class="sq-close" aria-label="Close station arrivals">×</button><h3>${esc(st?.name||quickCode)}</h3><div class="sq-sub">${age===null?'Connecting…':`Checked ${age}s ago`} · HKT · arrival estimates</div>
+ <div class="sq-actions"><button class="sq-save">${savedStations.includes(quickCode)?'★ Saved station':'☆ Save station'}</button><button class="sq-refresh">Refresh</button></div>
+ <div class="sq-controls"><label>Direction<select id="quickDirection"><option value="">Both directions</option><option value="UP" ${quickDirection==='UP'?'selected':''}>UP</option><option value="DOWN" ${quickDirection==='DOWN'?'selected':''}>DOWN</option></select></label><label>Walk to platform<select id="quickWalk">${[0,2,5,10].map(n=>`<option value="${n}" ${quickWalk===n?'selected':''}>${n===0?'Already here':n+' minutes'}</option>`).join('')}</select></label></div>
+ <label class="sq-raw"><input type="checkbox" id="quickRaw" ${quickRaw?'checked':''}> Compare raw API timestamps</label>`;
+ if(quickError)h+=`<div class="sq-note">${esc(quickError)}</div>`;
+ if(!rows.length)h+='<div class="sq-note">No fresh arrivals for this selection. Updates continue automatically.</div>';
+ const previous=new Map();
+ for(const o of rows){
+  const col=D.lines[o.line]?.color||'#889',dest=G.stations[o.dest]?.name||D.stations[o.dest]?.name||o.dest||'—',eta=etaOf(o),d=eta-now,refined=!!o.estimated&&!quickRaw;
+  const group=[o.line,o.direction,o.platform].join('|'),prior=previous.get(group),gap=prior==null?'':` · gap ~${Math.round((eta-prior)/60)} min`;previous.set(group,eta);
+  const walk=quickWalk?d<quickWalk*60?' · Too soon for your walk':d<quickWalk*60+60?' · Tight connection':' · Time to walk':'';
+  h+=`<div class="sq-row"><i style="background:${col}"></i><div><b>${esc(o.line)} · ${esc(dest)}</b><span>${esc(o.direction||'')} · platform ${esc(o.platform||'—')} · ${refined?'Model + live':'Official estimate'}</span><span>${Math.floor(A.age(o,quickFetchAt))}s old${gap}${walk}</span></div><time>${quickRaw?fmt(eta):A.time(eta,refined)}<small>${A.countdown(d,refined)}</small></time></div>`;
+ }
+ h+=`<button class="sq-full">Open full station board</button><div class="sq-note">Official estimates are shown to the minute. Model seconds appear only with an unambiguous timetable match and live delay support; greater accuracy is not guaranteed. Walking checks use your selected duration, not a measured station walking time.</div>`;
+ box.innerHTML=h;
+ box.querySelector('.sq-close').onclick=closeQuick;
+ box.querySelector('.sq-refresh').onclick=fetchQuick;
+ box.querySelector('.sq-save').onclick=()=>{savedStations=savedStations.includes(quickCode)?savedStations.filter(c=>c!==quickCode):[...savedStations.slice(-11),quickCode];try{localStorage.setItem('mtr.savedStations',JSON.stringify(savedStations))}catch{}renderSavedStations();renderQuick()};
+ box.querySelector('#quickDirection').onchange=e=>{quickDirection=e.target.value;e.target.blur();renderQuick()};
+ box.querySelector('#quickWalk').onchange=e=>{quickWalk=+e.target.value;e.target.blur();renderQuick()};
+ box.querySelector('#quickRaw').onchange=e=>{quickRaw=e.target.checked;e.target.blur();renderQuick()};
+ box.querySelector('.sq-full').onclick=()=>{(window.V12_OPEN_STATION||window.V11_OPEN_STATION)?.(quickCode);closeQuick()};
+}
+renderSavedStations();
 
 
-function buildGeoTDHotspots(){const box=$('#geotdStationHotspots');if(!box)return;box.innerHTML='';for(const [code,s] of Object.entries(G.stations||{})){if(!s.geotd)continue;let b=document.createElement('button');b.className='v12-geotd-hotspot';b.dataset.station=code;b.style.left=(s.geotd[0]*100)+'%';b.style.top=(s.geotd[1]*100)+'%';b.title=`${s.name} · click for ETA`;b.setAttribute('aria-label',`${s.name} station ETA`);b.onpointerdown=e=>e.stopPropagation();b.onclick=e=>{e.preventDefault();e.stopPropagation();openStationQuick(code)};box.appendChild(b)}}
+function buildGeoTDHotspots(){const box=$('#geotdStationHotspots');if(!box)return;box.innerHTML='';for(const [code,s] of Object.entries(G.stations||{})){if(!s.geotd)continue;let b=document.createElement('button');b.className='v12-geotd-hotspot';b.dataset.station=code;b.dataset.name=s.name;b.style.left=(s.geotd[0]*100)+'%';b.style.top=(s.geotd[1]*100)+'%';b.title=`${s.name} · click for ETA`;b.setAttribute('aria-label',`${s.name} station ETA`);b.onpointerdown=e=>e.stopPropagation();b.onclick=e=>{e.preventDefault();e.stopPropagation();openStationQuick(code)};box.appendChild(b)}}
 
 // ---------- HKO radar: fully lazy; never delays map startup ----------
 async function ensureRadarMeta(force=false){
@@ -250,12 +278,16 @@ function ensureOfficialImage(){const img=$('#officialWorld .official-map-img');i
 async function setMode(next){
   mode=next;$$('.map-mode-switch button').forEach(b=>b.classList.toggle('active',b.dataset.mapMode===next));
   $('#mapWorld')?.classList.toggle('hidden',next!=='geotd');$('#geoMap')?.classList.toggle('hidden',next!=='geo');$('#schematicPane')?.classList.toggle('hidden',next!=='schematic');$('#officialMapPane')?.classList.toggle('hidden',next!=='official');$('#radarControl')?.classList.toggle('hidden',next!=='geo');
-  for(const id of ['zoomOut','resetMap','zoomIn'])$('#'+id)?.classList.toggle('hidden',next!=='geotd');
+  for(const id of ['zoomOut','resetMap','zoomIn','mapQuality','stationLabels'])$('#'+id)?.classList.toggle('hidden',next!=='geotd');
   if(next==='geo'){await initGeo();updateGeoTrains(runtime.states||[])}else if(next==='schematic'){initScreenWorld('schematic');updateScreenTrains('schematic',runtime.states||[])}else if(next==='official'){ensureOfficialImage();initScreenWorld('official');updateScreenTrains('official',runtime.states||[])}
   const r=next==='geotd'?($('#mapImage')?.dataset.res?`GeoTD ${$('#mapImage').dataset.res}`:'GeoTD'):next==='geo'?`Real map · native WGS84/OSM tracks${directGeo.loaded?' · '+directGeo.loaded+' line routes':''} · real-size trains z${MIN_REAL_TRAIN_ZOOM}+`:next==='schematic'?'Calibrated vector schematic':'Official MTR map · heavy rail live overlay';$('#mapResolution').textContent=r;
 }
 $$('.map-mode-switch button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mapMode)));
 
+const lookup=$('#stationLookup');
+$('#stationOptions').innerHTML=Object.entries(G.stations).map(([code,s])=>`<option value="${esc(s.name)} (${esc(code)})"></option>`).join('');
+$('#stationFinder').onsubmit=e=>{e.preventDefault();const q=lookup.value.trim().toLowerCase();const entry=Object.entries(G.stations).find(([code,s])=>[code.toLowerCase(),s.name.toLowerCase(),`${s.name} (${code})`.toLowerCase()].includes(q));if(!entry){$('#finderStatus').textContent='Choose a station name or enter its three-letter code.';return}$('#finderStatus').textContent='';setMode('geotd');window.dispatchEvent(new CustomEvent('mtr:locate-station',{detail:entry[0]}));openStationQuick(entry[0])};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeQuick();$('#detail')?.classList.add('hidden');$('#fleetModal')?.classList.add('hidden')}if(e.key==='/'&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();lookup.focus()}});
 // controls for local screen worlds
 bindPanZoom('schematic');bindPanZoom('official');
 $('#schIn')?.addEventListener('click',()=>zoomWorld('schematic',1.25));$('#schOut')?.addEventListener('click',()=>zoomWorld('schematic',.8));$('#schReset')?.addEventListener('click',()=>fitWorld('schematic'));

@@ -27,6 +27,7 @@ import urllib.request
 import webbrowser
 
 from v12_backend import V12Backend
+from arrival_model import refine_arrivals
 
 ROOT = Path(__file__).resolve().parent
 EAL_DEFAULT_URL = "https://uonfjf884h.execute-api.ap-east-1.amazonaws.com/prod/api/TableViewer/getAllTrainStatusesValueV3"
@@ -397,7 +398,7 @@ class HeavyRailSource(CachedSource):
                     elif eta < now-6*3600:eta+=86400
                     obs.append({"line":line,"station":sta,"direction":direction,"dest":row.get("dest"),
                         "platform":row.get("plat"),"seq":row.get("seq"),"ttnt":row.get("ttnt"),
-                        "eta":row.get("time"),"eta_sec":eta})
+                        "eta":row.get("time"),"eta_sec":eta,"observed_at":dt.datetime.now(dt.timezone.utc).isoformat(),"upstream_time":block.get("curr_time") or j.get("sys_time")})
             return line,sta,obs,j.get("sys_time") or j.get("curr_time"),None
         except Exception as exc:
             return line,sta,[],None,type(exc).__name__
@@ -466,53 +467,19 @@ class HeavyRailSource(CachedSource):
                 ent=self.station_cache.get((line,station))
                 if ent and now-ent["ts"] <= STATION_CACHE_SEC:
                     out.extend(ent["observations"]); cached.append(line)
-        # MTR Next Train timestamps are useful live windows, but their HH:MM:SS field is not an
-        # independent one-second prediction: rows in the same response can share the same second
-        # phase.  Refine only the *phase* of each row with its matched WTT timing point plus the
-        # current line-delay estimate.  This keeps the live MTR minute/window authoritative while
-        # producing an explicitly modelled second-level estimate instead of false precision.
-        live=self.get() or {}; line_offsets=live.get("line_offsets") or {}
-        for o in out:
-            raw=o.get("eta_sec"); line=o.get("line"); sta=o.get("station")
-            o["raw_eta_sec"]=raw
-            if raw is None:continue
-            events=self.matcher.station_index(line).get(sta,[]) if line else []
-            base_info=line_offsets.get(line) or {}; base=base_info.get("delay_sec")
-            if base_info.get("confidence") == "low": base=None
-            dest=o.get("dest") or ""; best=None
-            for e in events:
-                ss=self.matcher._nearest_sched(e["sched"],raw); raw_delta=raw-ss
-                if abs(raw_delta)>1500:continue
-                penalty=0
-                if dest and dest not in e["remaining"]: penalty+=360
-                if dest and e["final"]!=dest: penalty+=90
-                target=base if base is not None else 0
-                score=abs(raw_delta-target)+penalty
-                if best is None or score<best[0]: best=(score,e,ss,raw_delta)
-            if not best:continue
-            _,e,ss,raw_delta=best
-            # Line delay is deliberately quantised by the network estimator.  When it is not
-            # available, use the WTT phase itself rather than copying the API response second.
-            model_delay=int(base) if base is not None else 0
-            phase=(ss+model_delay)%60
-            minute=(raw//60)*60
-            candidates=[minute+phase-60,minute+phase,minute+phase+60]
-            est=min(candidates,key=lambda x:abs(x-raw))
-            # Do not let second-phase refinement move a live row into a different ETA window.
-            if abs(est-raw)>35: est=raw
-            o["estimated_eta_sec"]=int(est)
-            o["scheduled_sec"]=int(ss)
-            o["estimate_delay_sec"]=model_delay
-            o["estimate_source"]="MTR ETA window + WTT seconds"+(" + live line delay" if base is not None else "")
-            o["estimate_confidence"]=(base_info.get("confidence") if base is not None else "timetable-phase")
-            o["estimated"]=True
-            o["matched_trip_key"]=e["key"]
+        live=self.get() or {}
+        try:
+            age=time.time()-dt.datetime.fromisoformat(live.get("fetched_at") or "").timestamp()
+        except (ValueError, TypeError):
+            age=float("inf")
+        offsets=(live.get("line_offsets") or {}) if 0<=age<=60 else {}
+        out=refine_arrivals(out,self.matcher,offsets)
         out.sort(key=lambda x:x.get("estimated_eta_sec",x.get("eta_sec",10**9)))
         return {"ok":bool(out),"station":station,"lines":valid,"observations":out,
                 "fetched_lines":fetched,"cached_lines":list(dict.fromkeys(cached)),"errors":errors[:10],
                 "fetched_at":dt.datetime.now(dt.timezone.utc).isoformat(),"server_epoch":time.time(),
-                "precision":"second-resolution estimate","source":"MTR official Next Train API + WTT phase model",
-                "accuracy_note":"MTR supplies the live ETA window; displayed seconds are estimated from the matched WTT timing point and current line-delay model, not claimed as one-second ground truth."}
+                "precision":"official estimate; seconds shown only for constrained model matches","source":"MTR official Next Train API + WTT phase model",
+                "accuracy_note":"Official times are estimates. Model seconds require an unambiguous timetable match and fresh live delay within 30 seconds of the official time; no measured accuracy improvement is claimed."}
 
     def _run_batch(self,targets,fresh_keys,errors,completed,total,started,phase,on_progress=None):
         if not targets:return completed
