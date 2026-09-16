@@ -10,6 +10,15 @@ python3 serve_live.py
 
 Open the localhost URL printed by the server (default `http://localhost:8080`). The Direct map, official ETA fusion, OSM tiles and weather overlays require internet access. EAL TMS telemetry additionally requires the same authorized HAR/API credential setup supported by the previous build.
 
+## GitHub Pages vs live mode
+
+The GitHub Pages deployment (https://gutentag-cloud.github.io/MTR-Live-Train-Map/) is served from a static host: it cannot run Python, so same-origin `/api/*` calls would return the host's HTML 404 page (seen previously as `Unexpected token '<' … is not valid JSON` / `HTTP 404` on the EAL and ETA badges).
+
+`config.js` routes all `/api/*` calls to the Render backend declared in `render.yaml` when the page is hosted on `gutentag-cloud.github.io`, and keeps same-origin calls when `serve_live.py` hosts the page locally. Notes:
+
+- The EAL TMS credential is configured **server-side only** — as `EAL_TMS_API_KEY` in the Render dashboard (never committed), or locally via a git-ignored HAR capture (`*.har`) picked up by `serve_live.py`.
+- The Render free tier sleeps when idle; the first request after inactivity can take up to a minute while the service cold-starts. The UI retries automatically.
+
 ## v13.3 refinement
 
 - Heavy-rail **Official MTR** positioning is reverted to the stable v13 nearest-line-pixel snap; the v13.1/v13.2 dense line-reconstruction algorithm is no longer used for train placement.
