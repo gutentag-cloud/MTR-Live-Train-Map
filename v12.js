@@ -168,6 +168,7 @@ function setActiveGeoTDStation(code){
   $$('.v12-geotd-hotspot').forEach(x=>x.classList.toggle('active',x.dataset.station===code));
 }
 function openStationQuick(code){
+  window.dispatchEvent(new CustomEvent('mtr:station-selected',{detail:code}));
   quickCode=code;quickDirection='';quickFetchAt=0;quickObs=[];quickError='Loading official ETA…';
   setActiveGeoTDStation(code);
   $('#stationQuick').classList.remove('hidden');
@@ -175,7 +176,7 @@ function openStationQuick(code){
   // app's ETA-corrected timetable/WTT fallback, so a station click is useful
   // even when a direct station request is temporarily unavailable.
   (window.V12_OPEN_STATION||window.V11_OPEN_STATION)?.(code);
-  renderQuick();fetchQuick();clearInterval(quickTimer);quickTimer=setInterval(fetchQuick,8000)
+  renderQuick();fetchQuick();clearInterval(quickTimer);quickTimer=setInterval(()=>{if(!document.hidden)fetchQuick()},8000)
 }
 function closeQuick(){quickCode=null;setActiveGeoTDStation(null);clearInterval(quickTimer);quickTimer=null;$('#stationQuick')?.classList.add('hidden')}
 function renderSavedStations(){
@@ -284,6 +285,7 @@ async function setMode(next){
 }
 $$('.map-mode-switch button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mapMode)));
 
+window.addEventListener('mtr:open-station',e=>{const code=e.detail;if(!G.stations[code])return;setMode('geotd');window.dispatchEvent(new CustomEvent('mtr:locate-station',{detail:code}));openStationQuick(code)});
 const lookup=$('#stationLookup');
 $('#stationOptions').innerHTML=Object.entries(G.stations).map(([code,s])=>`<option value="${esc(s.name)} (${esc(code)})"></option>`).join('');
 $('#stationFinder').onsubmit=e=>{e.preventDefault();const q=lookup.value.trim().toLowerCase();const entry=Object.entries(G.stations).find(([code,s])=>[code.toLowerCase(),s.name.toLowerCase(),`${s.name} (${code})`.toLowerCase()].includes(q));if(!entry){$('#finderStatus').textContent='Choose a station name or enter its three-letter code.';return}$('#finderStatus').textContent='';setMode('geotd');window.dispatchEvent(new CustomEvent('mtr:locate-station',{detail:entry[0]}));openStationQuick(entry[0])};

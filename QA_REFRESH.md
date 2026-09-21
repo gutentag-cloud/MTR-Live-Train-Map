@@ -45,3 +45,11 @@ Rebuild generated assets with `python3 tools/build_web_assets.py` (Pillow requir
 - Increased maximum GeoTD zoom to 16×. Main-map pan/wheel handlers no longer intercept controls or other map views.
 - Verified full image intrinsic dimensions in browser, automatic-quality switching, station lookup, label toggle, focus enter/exit, and 390px layout without horizontal overflow.
 - Existing eight Python tests, 360 geometry samples, arrival-format tests and JS syntax checks pass.
+
+## Journey and sharing tools
+
+- Added topology-based journey planner with fewer-changes / fewer-stops preferences, optional Airport Express, origin/destination swap, per-leg stop lists and live-arrival links.
+- Added shareable `?station=CODE` URLs and a train-layer visibility toggle.
+- Planner explicitly excludes real-time disruptions, fares, walking connections and operating-hour checks. No travel-time claims are synthesized from stop counts.
+- Tests: direct route, interchange continuity, optimization preferences, excluded/included Airport Express, unknown and identical stations. Existing arrival and geometry tests pass.
+- Browser verified journey → live board, deep links, train visibility and 390px planner layout with no horizontal document overflow.
