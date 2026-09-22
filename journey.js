@@ -1,7 +1,6 @@
 /* Route planning from the bundled station topology. Costs are stops/transfers, not minutes. */
 (function(root){
  function plan(paths,from,to,preference='transfers',includeExpress=false){
-  if(from===to)return {legs:[],stops:0,transfers:0};
   const graph=new Map();
   for(const [line,branches] of Object.entries(paths)){
    if(line==='LRL'||(!includeExpress&&line==='AEL'))continue;
@@ -9,6 +8,8 @@
     if(!graph.has(a))graph.set(a,[]);graph.get(a).push({to:b,line});
    }
   }
+  if(!graph.has(from)||!graph.has(to))return null;
+  if(from===to)return {legs:[],stops:0,transfers:0};
   const compare=(a,b)=>preference==='stops'?a.stops-b.stops||a.transfers-b.transfers:a.transfers-b.transfers||a.stops-b.stops;
   const queue=[{station:from,line:'',stops:0,transfers:0,edges:[]}],best=new Map();
   while(queue.length){queue.sort(compare);const current=queue.shift(),key=current.station+'|'+current.line;

@@ -10,15 +10,16 @@ document.body.append(dialog);
 const stations=Object.entries(G.stations).filter(([c])=>Object.values(G.paths).some(branches=>branches.some(p=>p.includes(c)))).sort((a,b)=>a[1].name.localeCompare(b[1].name));
 const options=stations.map(([c,s])=>`<option value="${esc(c)}">${esc(s.name)}</option>`).join('');
 $('#journeyFrom').innerHTML=options;$('#journeyTo').innerHTML=options;$('#journeyFrom').value='ADM';$('#journeyTo').value='TUC';
-$('#journeyBtn').onclick=()=>{if(currentStation&&stations.some(([c])=>c===currentStation))$('#journeyFrom').value=currentStation;dialog.showModal()};
+$('#journeyBtn').onclick=()=>{if(currentStation&&stations.some(([c])=>c===currentStation))$('#journeyFrom').value=currentStation;renderJourney();dialog.showModal()};
 $('#swapJourney').onclick=()=>{const from=$('#journeyFrom').value;$('#journeyFrom').value=$('#journeyTo').value;$('#journeyTo').value=from;renderJourney()};
+for(const id of ['journeyFrom','journeyTo','journeyPreference','journeyExpress'])$('#'+id).addEventListener('change',renderJourney);
 $('#journeyForm').onsubmit=e=>{e.preventDefault();renderJourney()};
 function openStation(code){window.dispatchEvent(new CustomEvent('mtr:open-station',{detail:code}))}
 function renderJourney(){
  const from=$('#journeyFrom').value,to=$('#journeyTo').value,result=JourneyPlanner.plan(G.paths,from,to,$('#journeyPreference').value,$('#journeyExpress').checked),box=$('#journeyResult');
  if(!result){box.innerHTML='<p>No connected route is available with these options.</p>';return}
  if(!result.stops){box.innerHTML='<p>You have selected the same station. No train journey is needed.</p>';return}
- box.innerHTML=`<div class="journey-summary"><strong>${result.stops} stops</strong><span>${result.transfers?result.transfers+' change'+(result.transfers>1?'s':''):'Direct · no changes'}</span></div><ol class="journey-legs">${result.legs.map((l,i)=>`<li style="--route-color:${D.lines[l.line]?.color||'#999'}"><small>${i?'Change at '+esc(name(l.from)):'Start at '+esc(name(l.from))}</small><h3>${esc(D.lines[l.line]?.name||l.line)}</h3><p>Ride to <b>${esc(name(l.to))}</b> · ${l.stations.length-1} stops</p><details><summary>Show stops</summary><div class="journey-stops">${l.stations.map(c=>`<button type="button" data-station="${esc(c)}">${esc(name(c))}</button>`).join('')}</div></details><button type="button" class="journey-arrivals" data-station="${esc(l.from)}">Check arrivals at ${esc(name(l.from))} ↗</button></li>`).join('')}</ol>`;
+ box.innerHTML=`<div class="journey-summary"><strong>${result.stops} ${result.stops===1?'stop':'stops'}</strong><span>${result.transfers?result.transfers+' change'+(result.transfers>1?'s':''):'Direct · no changes'}</span></div><ol class="journey-legs">${result.legs.map((l,i)=>`<li style="--route-color:${D.lines[l.line]?.color||'#999'}"><small>${i?'Change at '+esc(name(l.from)):'Start at '+esc(name(l.from))}</small><h3>${esc(D.lines[l.line]?.name||l.line)}</h3><p>Ride to <b>${esc(name(l.to))}</b> · ${l.stations.length-1} ${l.stations.length===2?'stop':'stops'}</p><details><summary>Show stops</summary><div class="journey-stops">${l.stations.map(c=>`<button type="button" data-station="${esc(c)}">${esc(name(c))}</button>`).join('')}</div></details><button type="button" class="journey-arrivals" data-station="${esc(l.from)}">Check arrivals at ${esc(name(l.from))} ↗</button></li>`).join('')}</ol>`;
  box.querySelectorAll('[data-station]').forEach(b=>b.onclick=()=>{dialog.close();openStation(b.dataset.station)});
 }
 $('#cleanMap').onchange=e=>{document.body.classList.toggle('hide-trains',!e.target.checked)};

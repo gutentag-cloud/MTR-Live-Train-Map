@@ -53,3 +53,10 @@ Rebuild generated assets with `python3 tools/build_web_assets.py` (Pillow requir
 - Planner explicitly excludes real-time disruptions, fares, walking connections and operating-hour checks. No travel-time claims are synthesized from stop counts.
 - Tests: direct route, interchange continuity, optimization preferences, excluded/included Airport Express, unknown and identical stations. Existing arrival and geometry tests pass.
 - Browser verified journey → live board, deep links, train visibility and 390px planner layout with no horizontal document overflow.
+
+## September 22 bug fixes
+
+- Recompute journey results when any planning option changes and when reopening with a different starting station; validate identical unknown/excluded stations.
+- Deduplicate overlapping station-board requests; ignore out-of-order responses and errors after a station or line selection changes. Add a 15-second timeout.
+- Limit the geographic train visibility switch to train-specific panes, preserving other map markers.
+- Regression tests cover duplicate requests, stale successes/errors, and invalid planner endpoints. Browser verified automatic route updates and no console errors in the checked flow.
