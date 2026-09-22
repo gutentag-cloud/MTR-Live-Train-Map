@@ -5,7 +5,7 @@ services:
     plan: free
 
     buildCommand: python3 -m py_compile serve_live.py
-    startCommand: python3 serve_live.py --no-browser
+    startCommand: python3 serve_live.py --no-browser --api-only
 
     healthCheckPath: /api/health
 

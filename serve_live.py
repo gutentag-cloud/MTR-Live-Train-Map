@@ -14,6 +14,7 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import datetime as dt
 import functools
+import gzip
 import http.server
 import json
 import os
@@ -28,6 +29,7 @@ import webbrowser
 
 from v12_backend import V12Backend
 from arrival_model import refine_arrivals
+from training_store import TrainingStore
 
 ROOT = Path(__file__).resolve().parent
 EAL_DEFAULT_URL = "https://uonfjf884h.execute-api.ap-east-1.amazonaws.com/prod/api/TableViewer/getAllTrainStatusesValueV3"
@@ -199,6 +201,7 @@ class HistoryStore:
     def __init__(self, root: Path, retention_hours=24):
         self.path=root/"runtime"/"history.sqlite3"
         self.path.parent.mkdir(parents=True,exist_ok=True)
+        self.training=TrainingStore(root)
         self.retention_hours=retention_hours
         self.lock=threading.Lock()
         self._last={}
@@ -208,19 +211,20 @@ class HistoryStore:
     def record(self, kind, payload, min_interval=8):
         now=time.time()
         if now-self._last.get(kind,0)<min_interval:return
+        if kind=="eal":self.training.record(kind,payload)
         safe=dict(payload)
         safe.pop("error",None)
         with self.lock, sqlite3.connect(self.path) as db:
             db.execute("INSERT INTO snapshots(ts,kind,payload) VALUES(?,?,?)",(now,kind,json.dumps(safe,separators=(",",":"),ensure_ascii=False)))
             db.execute("DELETE FROM snapshots WHERE ts<?",(now-self.retention_hours*3600,))
         self._last[kind]=now
-    def query(self, minutes=30, kinds=None, limit=5000):
+    def query(self, minutes=30, kinds=None, limit=5000, since=0.0):
         minutes=max(1,min(24*60,int(minutes)))
-        since=time.time()-minutes*60
+        start=max(float(since or 0.0), time.time()-minutes*60)
         kinds=[x for x in (kinds or ["eal","rail","lrt"]) if x in {"eal","rail","lrt"}]
         if not kinds:return []
         qs=','.join('?' for _ in kinds)
-        args=[since,*kinds,limit]
+        args=[start,*kinds,limit]
         with self.lock, sqlite3.connect(self.path) as db:
             rows=db.execute(f"SELECT ts,kind,payload FROM snapshots WHERE ts>=? AND kind IN ({qs}) ORDER BY ts ASC LIMIT ?",args).fetchall()
         out=[]
@@ -355,10 +359,8 @@ class TimetableMatcher:
                     if key in used:continue
                     ss=self._nearest_sched(e["sched"],o["eta_sec"]); delta=o["eta_sec"]-ss
                     if abs(delta)>1200:continue
-                    penalty=0
-                    if dest and dest not in e["remaining"]:penalty+=360
-                    if dest and e["final"]!=dest:penalty+=90
-                    score=abs(delta)+penalty
+                    if dest and e["final"]!=dest:continue
+                    score=abs(delta)
                     if best is None or score<best[0]:best=(score,key,delta,e)
                 if best:
                     _,key,delta,e=best; used.add(key)
@@ -499,11 +501,13 @@ class HeavyRailSource(CachedSource):
         now=time.time(); observations=[]; cached_used=0; station_ages={}
         for key,entry in list(self.station_cache.items()):
             age=now-entry["ts"]
-            if age>STATION_CACHE_SEC:continue
+            if age>30:continue
             observations.extend(entry["observations"]); station_ages[f"{key[0]}-{key[1]}"]=round(age,1)
             if key not in fresh_keys:cached_used+=1
+        if self.history:self.history.training.record("eta",{"observations":observations})
         line_offsets=self.matcher.estimate_line_offsets(observations) if observations else {}
-        corrections=self.matcher.match(observations,line_offsets) if observations else {}
+        corrections_full=self.matcher.match(observations,line_offsets) if observations else {}
+        corrections={k:{f:v for f,v in e.items() if f!="anchors"} for k,e in corrections_full.items()}
         by_line={}
         for k,v in corrections.items():
             if v.get("confidence") in ("high","medium"):
@@ -654,12 +658,15 @@ class LightRailSource(CachedSource):
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
-    eal=None; heavy=None; lrt=None; history=None; v11=None
-    def _json(self,data,status=200):
+    eal=None; heavy=None; lrt=None; history=None; v11=None; api_only=False
+    def _json(self,data,status=200,cache="no-store"):
         body=json.dumps(data,separators=(",",":"),ensure_ascii=False).encode("utf-8")
         self.send_response(status); self.send_header("Content-Type","application/json; charset=utf-8")
         self.send_header("Access-Control-Allow-Origin","*")
-        self.send_header("Cache-Control","no-store"); self.send_header("Content-Length",str(len(body))); self.end_headers(); self.wfile.write(body)
+        self.send_header("Cache-Control",cache)
+        if len(body)>256 and "gzip" in (self.headers.get("Accept-Encoding") or ""):
+            body=gzip.compress(body); self.send_header("Content-Encoding","gzip")
+        self.send_header("Content-Length",str(len(body))); self.end_headers(); self.wfile.write(body)
     def _bytes(self,body,content_type="application/octet-stream",status=200,cache="public, max-age=120"):
         self.send_response(status)
         self.send_header("Content-Type",content_type)
@@ -672,8 +679,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not self.path.startswith("/api/"):
             self.send_header("Cache-Control","no-store, max-age=0")
         super().end_headers()
+    def send_head(self):
+        resolved=Path(self.translate_path(self.path)).resolve()
+        try:parts=resolved.relative_to(ROOT.resolve()).parts
+        except ValueError:
+            self.send_error(404); return None
+        if any(p.startswith('.') or p in ('runtime','__pycache__') for p in parts) or resolved.suffix.lower() in ('.har','.sqlite','.sqlite3','.db'):
+            self.send_error(404); return None
+        return super().send_head()
     def do_GET(self):
         path=self.path.split("?",1)[0]
+        if self.api_only and not path.startswith("/api/"):
+            self._json({"ok":False,"error":"API-only deployment; static frontend is served by GitHub Pages"},404); return
         if path=="/api/health":
             r=self.heavy.get(); l=self.lrt.get(); e=self.eal.get()
             self._json({"ok":True,"version":"13.3","rail":{"ok":bool(r.get("ok")),"loading":bool(r.get("loading")),"phase":r.get("phase"),"completed":r.get("completed_requests"),"total":r.get("total_requests"),"fresh_stations":r.get("fresh_station_count"),"cached_stations":r.get("cached_station_count"),"failures":r.get("failed_request_count"),"elapsed_ms":r.get("cycle_elapsed_ms"),"fetched_at":r.get("fetched_at"),"errors":r.get("errors",[])[:5]},"lrt":{"ok":bool(l.get("ok")),"fresh_stations":l.get("fresh_station_count"),"cached_stations":l.get("cached_station_count"),"elapsed_ms":l.get("cycle_elapsed_ms"),"fetched_at":l.get("fetched_at"),"errors":l.get("errors",[])[:5]},"eal":{"ok":bool(e.get("ok")),"loading":bool(e.get("loading")),"stale":bool(e.get("stale")),"fetched_at":e.get("fetched_at"),"error":e.get("error")}}); return
@@ -693,17 +710,17 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._json(board); return
         if path=="/api/map/official-system":
             try:
-                body,ctype=self.v11.public_asset("official-system"); self._bytes(body,ctype,cache="public, max-age=3600")
+                body,ctype=self.v11.public_asset("official-system"); self._bytes(body,ctype,cache="public, max-age=86400")
             except Exception as exc:self._json({"ok":False,"error":type(exc).__name__},502)
             return
         if path=="/api/map/light-rail":
             try:
-                body,ctype=self.v11.public_asset("light-rail-map"); self._bytes(body,ctype,cache="public, max-age=3600")
+                body,ctype=self.v11.public_asset("light-rail-map"); self._bytes(body,ctype,cache="public, max-age=86400")
             except Exception as exc:self._json({"ok":False,"error":type(exc).__name__},502)
             return
         if path=="/api/map/light-rail-system":
             try:
-                body,ctype=self.v11.public_asset("light-rail-system"); self._bytes(body,ctype,cache="public, max-age=3600")
+                body,ctype=self.v11.public_asset("light-rail-system"); self._bytes(body,ctype,cache="public, max-age=86400")
             except Exception as exc:self._json({"ok":False,"error":type(exc).__name__},502)
             return
         if path=="/api/weather/radar":
@@ -713,29 +730,35 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if path=="/api/weather/radar-image":
             q=urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query); url=(q.get("u") or [""])[0]
             try:
-                body,ctype=self.v11.radar_image(url); self._bytes(body,ctype)
+                body,ctype=self.v11.radar_image(url); self._bytes(body,ctype,cache="public, max-age=300")
             except Exception as exc:self._json({"ok":False,"error":type(exc).__name__},502)
             return
         if path=="/api/geo/stations":
-            try:self._json(self.v11.geo_stations())
+            try:self._json(self.v11.geo_stations(),cache="public, max-age=600")
             except Exception as exc:self._json({"ok":False,"stations":{},"error":type(exc).__name__},502)
             return
         if path=="/api/geo/railways":
-            try:self._json(self.v11.railways())
+            try:self._json(self.v11.railways(),cache="public, max-age=600")
             except Exception as exc:self._json({"ok":False,"ways":[],"error":type(exc).__name__},502)
             return
         if path=="/api/geo/mtr-route":
             q=urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query); line=(q.get("line") or [""])[0]
             try:
-                out=self.v11.mtr_route(line); self._json(out,200 if out.get("ok") else 502)
+                out=self.v11.mtr_route(line); self._json(out,200 if out.get("ok") else 502,cache="public, max-age=600")
             except ValueError as exc:self._json({"ok":False,"error":str(exc)},400)
             except Exception as exc:self._json({"ok":False,"error":type(exc).__name__},502)
             return
         if path=="/api/history":
             q=urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
-            mins=int((q.get("minutes") or ["30"])[0])
+            def _int(name,default,cap):
+                try:return max(0,min(cap,int((q.get(name) or [default])[0])))
+                except (TypeError,ValueError):return default
+            mins=_int("minutes",30,24*60) or 30
             kinds=(q.get("kinds") or ["eal,rail,lrt"])[0].split(",")
-            self._json({"ok":True,"snapshots":self.history.query(mins,kinds),"status":self.history.status()}); return
+            limit=max(1,_int("limit",600,2000))
+            since=_int("since",0,10**12)
+            self._json({"ok":True,"snapshots":self.history.query(mins,kinds,limit,since),"status":self.history.status()}); return
+        if path=="/api/training/status": self._json({"ok":True,**self.history.training.status()}); return
         if path=="/api/history/status": self._json({"ok":True,**self.history.status()}); return
         super().do_GET()
     def log_message(self,fmt,*args):
@@ -752,7 +775,7 @@ def find_har(arg):
 
 
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument("--har"); ap.add_argument("--port",type=int,default=int(os.environ.get("PORT","8080"))); ap.add_argument("--no-browser",action="store_true"); args=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument("--har"); ap.add_argument("--port",type=int,default=int(os.environ.get("PORT","8080"))); ap.add_argument("--no-browser",action="store_true"); ap.add_argument("--api-only",action="store_true",help="404 non-/api paths so the deployment serves no static assets"); args=ap.parse_args()
     eal_url=os.environ.get("EAL_TMS_URL",EAL_DEFAULT_URL); key=os.environ.get("EAL_TMS_API_KEY"); har=find_har(args.har)
     if not key and har and har.exists():
         eal_url,key=discover_from_har(har); print(f"EAL TMS configuration loaded from HAR: {har.name} (credential remains server-side)")
@@ -764,7 +787,7 @@ def main():
     eal=EalSource(eal_url,key,history) if key else None
     matcher=TimetableMatcher(ROOT); heavy=HeavyRailSource(matcher,history); lrt=LightRailSource(history)
     Handler.eal=eal or type("OfflineEAL",(),{"get":lambda self:{"ok":False,"error":"EAL TMS credential not configured","trains":[]}})()
-    Handler.heavy=heavy; Handler.lrt=lrt; Handler.history=history; Handler.v11=v12
+    Handler.heavy=heavy; Handler.lrt=lrt; Handler.history=history; Handler.v11=v12; Handler.api_only=args.api_only
     if eal: threading.Thread(target=eal.loop,daemon=True).start()
     threading.Thread(target=heavy.loop,daemon=True).start(); threading.Thread(target=lrt.loop,daemon=True).start()
 

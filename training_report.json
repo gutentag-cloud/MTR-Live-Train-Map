@@ -1,0 +1,14 @@
+{
+  "labeled_rows": 42087,
+  "journeys": 2832,
+  "days": 2,
+  "test_rows": 7682,
+  "test_mae_seconds": 12.060856547774017,
+  "constant_speed_baseline_mae_seconds": 46.50113956046614,
+  "eligible_for_review": false,
+  "deployed": false,
+  "split": "chronological 80/20 by complete journey; no journey in both partitions",
+  "target": "time to first stopped telemetry sample, not exact doors-open time",
+  "scope": "East Rail only; sampled telemetry labels, not GPS",
+  "model": "median remaining time by directed station pair and progress decile"
+}

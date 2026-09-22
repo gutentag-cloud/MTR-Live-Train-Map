@@ -60,3 +60,11 @@ Rebuild generated assets with `python3 tools/build_web_assets.py` (Pillow requir
 - Deduplicate overlapping station-board requests; ignore out-of-order responses and errors after a station or line selection changes. Add a 15-second timeout.
 - Limit the geographic train visibility switch to train-specific panes, preserving other map markers.
 - Regression tests cover duplicate requests, stale successes/errors, and invalid planner endpoints. Browser verified automatic route updates and no console errors in the checked flow.
+
+## September 23: position freshness, phone and training
+- Reject stale per-train telemetry; cap latency compensation at three seconds and never advance stopped trains beyond a segment.
+- Remove line-wide fallback from both map corrections and arrival forecasts; expire ETA anchors at 30 seconds and apply large trip corrections promptly.
+- Add phone navigation and responsive dialogs, original 12K GeoTD retained.
+- Add whitelisted deduplicated observation archive, offline label/model pipeline and historical evaluation report. Model remains undeployed; persistent cloud storage remains unconfigured.
+- Exit guidance defaults MKK → ADM Exit F; exact car/door mapping remains unverified.
+- Validation: 11 Python tests; JS geometry/freshness, arrival presentation, journey, board-race and position regressions pass. At 390 × 844, arrivals, data and door dialogs work; no document overflow. Light Rail sidebar remains visible. Browser error log empty. GeoTD natural width 12,000 confirmed. Raw runtime files return 404 for GET and HEAD.
