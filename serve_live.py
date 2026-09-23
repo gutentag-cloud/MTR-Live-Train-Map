@@ -205,9 +205,17 @@ class HistoryStore:
         self.retention_hours=retention_hours
         self.lock=threading.Lock()
         self._last={}
+        self._last_vacuum=time.time()
         with sqlite3.connect(self.path) as db:
+            # Pruned rows only free pages inside the file; without auto_vacuum a 24 h window
+            # of ~80 MB grew to a ~480 MB file. Converting an existing file needs one VACUUM.
+            if db.execute("PRAGMA auto_vacuum").fetchone()[0]!=2:
+                db.execute("PRAGMA auto_vacuum=INCREMENTAL")
+                db.isolation_level=None
+                db.execute("VACUUM")
             db.execute("CREATE TABLE IF NOT EXISTS snapshots (ts REAL NOT NULL, kind TEXT NOT NULL, payload TEXT NOT NULL)")
             db.execute("CREATE INDEX IF NOT EXISTS idx_snapshots_kind_ts ON snapshots(kind,ts)")
+    VACUUM_INTERVAL=600
     def record(self, kind, payload, min_interval=8):
         now=time.time()
         if now-self._last.get(kind,0)<min_interval:return
@@ -217,6 +225,10 @@ class HistoryStore:
         with self.lock, sqlite3.connect(self.path) as db:
             db.execute("INSERT INTO snapshots(ts,kind,payload) VALUES(?,?,?)",(now,kind,json.dumps(safe,separators=(",",":"),ensure_ascii=False)))
             db.execute("DELETE FROM snapshots WHERE ts<?",(now-self.retention_hours*3600,))
+            if now-self._last_vacuum>=self.VACUUM_INTERVAL:
+                db.commit()
+                db.execute("PRAGMA incremental_vacuum").fetchall()  # steps once per freed page
+                self._last_vacuum=now
         self._last[kind]=now
     def query(self, minutes=30, kinds=None, limit=5000, since=0.0):
         minutes=max(1,min(24*60,int(minutes)))

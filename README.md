@@ -59,6 +59,12 @@ This workspace includes faster progressive GeoTD images, corrected Light Rail ma
 Checks:
 
 ```bash
-node tests/regressions.cjs
-python3 tests/test_lrt_freshness.py
+for t in tests/*.cjs; do node "$t"; done
+for t in tests/test_*.py; do python3 "$t"; done
 ```
+
+## Maintenance refinement (2026-09-23)
+
+- `runtime/history.sqlite3` now uses incremental auto-vacuum. Before, the 24 h retention deleted rows but SQLite kept the freed pages, so a ~80 MB window sat in a ~480 MB file. Existing files are converted once at startup (about 1 s for 480 MB) and shrink every 10 minutes after that.
+- The Light Rail page stops polling while its tab is hidden (30 s back-off) and fetches immediately when it becomes visible again.
+- `tests/test_training.py` runs from any working directory.

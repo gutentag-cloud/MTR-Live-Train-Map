@@ -1,4 +1,6 @@
-import json,sqlite3,tempfile,unittest
+import json,sqlite3,sys,tempfile,unittest
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from unittest.mock import patch
 from training_store import TrainingStore
 from tools.train_arrival_model import build_rows,train
