@@ -2,6 +2,7 @@
 import datetime as dt
 import json
 import os
+from contextlib import closing
 import sqlite3
 import threading
 from pathlib import Path
@@ -11,7 +12,7 @@ class TrainingStore:
         self.path=Path(os.environ.get('TRAINING_DB_PATH',str(Path(root)/'runtime'/'training.sqlite3')))
         self.path.parent.mkdir(parents=True,exist_ok=True)
         self.lock=threading.Lock()
-        with sqlite3.connect(self.path) as db:
+        with closing(sqlite3.connect(self.path)) as db, db:
             db.execute('PRAGMA journal_mode=WAL')
             db.execute('CREATE TABLE IF NOT EXISTS samples(kind TEXT, entity TEXT, observed REAL, payload TEXT, PRIMARY KEY(kind,entity,observed))')
     def record(self,kind,payload):
@@ -35,9 +36,9 @@ class TrainingStore:
                 entity='|'.join(str(safe.get(k,'')) for k in ['line','station','direction','seq'])
                 rows.append((kind,entity,ts,json.dumps(safe,separators=(',',':'))))
         if rows:
-            with self.lock,sqlite3.connect(self.path) as db:db.executemany('INSERT OR IGNORE INTO samples VALUES(?,?,?,?)',rows)
+            with self.lock,closing(sqlite3.connect(self.path)) as db, db:db.executemany('INSERT OR IGNORE INTO samples VALUES(?,?,?,?)',rows)
     def status(self):
-        with self.lock,sqlite3.connect(self.path) as db:
+        with self.lock,closing(sqlite3.connect(self.path)) as db, db:
             rows=db.execute('SELECT kind,COUNT(*),MIN(observed),MAX(observed) FROM samples GROUP BY kind').fetchall()
         return {'sources':[dict(zip(['kind','rows','oldest','newest'],r)) for r in rows],
                 'retention':'No automatic deletion; export and back up the configured database',

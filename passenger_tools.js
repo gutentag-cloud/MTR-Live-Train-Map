@@ -14,6 +14,30 @@ $('#doorFrom').value='MKK';$('#doorTo').value='ADM';
 function openDoor(){door.showModal();doorResult()}
 function doorResult(){const from=$('#doorFrom').value,to=$('#doorTo').value,exit=$('#doorExit').value.trim().toUpperCase(),r=$('#doorResult');r.replaceChildren();let p=document.createElement('p');p.textContent=`${G.stations[from].name} → ${G.stations[to].name} · Exit ${exit||'not selected'}`;r.append(p);let note=document.createElement('p');note.textContent=from===to?'Select a different destination for a train journey.':!exit?'Enter your destination exit.':'Car and door mapping is not verified in this app. In MTR Mobile, select this journey, open Suggested Route → Fast Exit, then choose this exit. An arrival platform is also needed at stations with multiple possible platforms.';r.append(note);let a=document.createElement('a');a.href='https://www.mtr.com.hk/mtrmobile/en/transport/fast-exit/';a.target='_blank';a.rel='noopener';a.textContent='MTR Fast Exit instructions ↗';r.append(a)}
 $('#doorCheck').onclick=doorResult;for(const id of ['doorFrom','doorTo','doorExit'])$('#'+id).addEventListener('change',doorResult);
-async function openData(){data.showModal();const box=data.querySelector('.passenger-content');box.textContent='Loading collection status…';try{const status=await(await apiFetch('/api/training/status',{signal:AbortSignal.timeout(12000)})).json();box.replaceChildren();const heading=document.createElement('p');heading.textContent='Collection runs on the API server while it is awake. Telemetry observations are archived separately from ETA predictions.';box.append(heading);for(const s of status.sources||[]){const p=document.createElement('p');p.textContent=`${s.kind==='eal'?'East Rail telemetry':'Official ETA'}: ${s.rows.toLocaleString()} observations`;box.append(p)}const note=document.createElement('p');note.textContent='Cloud collection needs persistent storage and an always-on service. A sleeping or redeployed free host cannot guarantee continuous data retention.';box.append(note)}catch{box.textContent='The collection server is unavailable. The historical validation report below is still available.'}
-try{const report=await(await fetch('training_report.json')).json();const p=document.createElement('p');p.textContent=`Historical experiment: ${report.labeled_rows.toLocaleString()} labeled rows, ${report.journeys.toLocaleString()} journeys across ${report.days} days. Held-out mean error ${report.test_mae_seconds.toFixed(1)} seconds versus ${report.constant_speed_baseline_mae_seconds.toFixed(1)} seconds for distance/speed. Experimental; not deployed. This predicts a stopped telemetry sample, not an exact physical position.`;box.append(p)}catch{} }
+async function openData(){
+ data.showModal();const box=data.querySelector('.passenger-content');box.replaceChildren();
+ const statusBox=document.createElement('section'),reportBox=document.createElement('section');box.append(reportBox,statusBox);
+ statusBox.textContent='Checking collector…';reportBox.textContent='Loading historical evaluation…';
+ const paragraph=(parent,text)=>{const p=document.createElement('p');p.textContent=text;parent.append(p)};
+ await Promise.allSettled([
+  (async()=>{try{
+   const response=await apiFetch('/api/training/status',{signal:AbortSignal.timeout(12000)});if(!response.ok)throw Error('Unavailable');const status=await response.json();statusBox.replaceChildren();
+   paragraph(statusBox,'Collector observations');
+   for(const source of status.sources||[])paragraph(statusBox,`${source.kind==='eal'?'East Rail telemetry':'Official ETA'}: ${source.rows.toLocaleString()} rows. Last record: ${new Date(source.newest*1000).toLocaleString('en-GB',{timeZone:'Asia/Hong_Kong'})} HKT.`);
+   paragraph(statusBox,'Collection runs while the API server is awake. Continuous collection requires persistent storage and an always-on service.');
+  }catch{statusBox.textContent='Collector status unavailable. The historical evaluation above is independent of the live API.'}})(),
+  (async()=>{try{
+   const response=await fetch('training_report.json',{signal:AbortSignal.timeout(12000)});if(!response.ok)throw Error('Unavailable');const r=await response.json();reportBox.replaceChildren();
+   const seconds=n=>Number.isFinite(n)?n.toFixed(1)+' s':'not evaluated';
+   paragraph(reportBox,`Historical model · ${r.deployed?'active':'not deployed'}`);
+   paragraph(reportBox,`${r.labeled_rows.toLocaleString()} labeled observations, ${r.journeys.toLocaleString()} arrival groups across ${r.days} dates. ${r.dates?.join(', ')||''}`);
+   paragraph(reportBox,`Training: ${r.training_dates?.join(', ')||'see report'}. Validation: ${r.validation_dates?.join(', ')||'see report'}. Test: ${r.test_dates?.join(', ')||'see report'}.`);
+   paragraph(reportBox,`Held-out mean error: ${seconds(r.test_mae_seconds)}. Learned progress-only baseline: ${seconds(r.test?.progress_baseline_mae_seconds)}. Distance/speed baseline: ${seconds(r.constant_speed_baseline_mae_seconds)}.`);
+   paragraph(reportBox,`90th-percentile error: ${seconds(r.test?.p90_error_seconds)}. Model support: ${((r.test?.coverage||0)*100).toFixed(1)}%. Error includes unsupported rows using fallback estimates.`);
+   if(r.test?.segments){const table=document.createElement('table');table.className='evaluation-table';const caption=document.createElement('caption');caption.textContent='Your direction: Mong Kok East → Admiralty';table.append(caption);for(const name of ['MKK → HUH','HUH → EXC','EXC → ADM']){const metric=r.test.segments[name];if(!metric)continue;const row=table.insertRow();row.insertCell().textContent=name;row.insertCell().textContent=seconds(metric.mae_seconds)+' mean error'}reportBox.append(table)}
+   paragraph(reportBox,'Target: time to the first stopped telemetry sample. These are not GPS-position errors or independently measured doors-open times.');
+   if(r.review_blockers?.length)paragraph(reportBox,'Not ready for live use: '+r.review_blockers.join('; ')+'.');
+  }catch{reportBox.textContent='Historical evaluation could not be loaded.'}})()
+ ]);
+}
 })();

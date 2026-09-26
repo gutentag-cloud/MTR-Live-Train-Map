@@ -18,9 +18,24 @@ Set `TRAINING_DB_PATH` to a path on a persistent volume for hosted deployments. 
 ## Training
 Run `python3 tools/train_arrival_model.py` to backfill available local replay snapshots, produce `runtime/training/arrival_labels.csv`, and evaluate `runtime/training/arrival_model.json`. This cannot recover observations never recorded.
 
-The initial public `training_report.json` describes 42,087 labeled observations and 2,832 arrival groups across two calendar dates. Chronological 80/20 evaluation keeps each complete arrival group in one partition. On 7,682 supported held-out rows, mean absolute error was 12.1 seconds versus 46.5 seconds for distance/speed. Unsupported station/progress buckets are excluded from that metric. Labels are the first stopped telemetry sample with gaps up to 30 seconds, not independently measured doors-open times. Adjacent observations are correlated; these figures are an experiment, not guaranteed passenger accuracy.
+The September 27 retraining uses 85,065 labeled observations across 5,900 arrival groups from September 21–23. Stopped telemetry sometimes retains the arriving station pair: the labeler uses SSP distances to identify the arrival station, normalizes station aliases, and breaks sequences on gaps, reversals and unobserved stops. These labels are still a telemetry proxy, not independently verified doors-open times.
 
-The learned baseline is a median by directed station pair and progress decile. It is not deployed. More dates, disruption coverage and independent measurements are needed. The eligibility flag is only a preliminary review gate; it never automatically activates a model. Official ETA predictions are never treated as ground truth.
+Entire dates are separated: September 21 training, September 22 model selection/uncertainty estimation, September 23 final test. Arrival groups crossing midnight are purged. Cells need five independent arrival groups; repeated polling frames do not count as independent training support. The selected model uses directed station pair, progress decile and speed band. Missing cells fall back to the learned progress-only baseline, then distance/speed. All held-out rows, including fallbacks, contribute to the reported error.
+
+On 45,652 final-test rows (3,330 arrival groups), mean absolute error is 7.61 seconds; the learned progress-only baseline is 8.80 seconds and distance/speed is 46.67 seconds. Giving each arrival group equal evaluation weight yields 6.52 seconds. The 90th-percentile row error is 15 seconds. Direct model support is 96.1%. A ±28-second error band estimated on validation data covers 97.5% of test rows; it is an empirical band, not a guaranteed confidence interval.
+
+For MKK → HUH, HUH → EXC and EXC → ADM, held-out mean errors are 4.89, 4.92 and 6.47 seconds respectively. These are next-stop time errors, not full-journey ETA errors or physical-position errors. The experiment uses only three partial calendar dates and correlated samples; disruption/generalization performance remains unknown. The results are not directly comparable to the earlier 12.1-second result because the labels and split changed.
+
+The learned model remains offline and is not loaded by the live app. At least five labeled dates, sufficient held-out journeys, support and uncertainty coverage are required even for a review recommendation. No gate automatically activates the model. Official ETA predictions are never treated as ground truth.
+
+## Prediction review fixes
+- Periodic timetable patterns can fit several line delays equally well; such offsets now have low confidence.
+- Individual trip corrections require an unambiguous candidate and corroboration at two different stations. A single anchor stays low confidence.
+- Heavy-rail responses with stale, missing or future upstream timestamps are rejected, even if fetched just now.
+- Board trip matching requires the exact terminal and rejects nearby ambiguous candidates.
+- Live polling has request deadlines; invalid timestamps and non-finite/missing distances cannot become fresh measured positions.
+- Historical delay trends older than 60 seconds no longer steer current forecasts.
+- The Data dialog loads its historical report independently of collector availability and handles missing evaluation metrics.
 
 ## Exit F
 The boarding guidance form defaults to Mong Kok East → Admiralty, Exit F. There is no verified platform/car/door mapping in this repository, so the app does not invent an optimal door. It links the official MTR Mobile Fast Exit instructions. An actual shortest-walk recommendation remains pending verified mapping for the arrival platform and exit.

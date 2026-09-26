@@ -20,6 +20,7 @@ import json
 import os
 from pathlib import Path
 import statistics
+from contextlib import closing
 import sqlite3
 import threading
 import time
@@ -206,7 +207,7 @@ class HistoryStore:
         self.lock=threading.Lock()
         self._last={}
         self._last_vacuum=time.time()
-        with sqlite3.connect(self.path) as db:
+        with closing(sqlite3.connect(self.path)) as db, db:
             # Pruned rows only free pages inside the file; without auto_vacuum a 24 h window
             # of ~80 MB grew to a ~480 MB file. Converting an existing file needs one VACUUM.
             if db.execute("PRAGMA auto_vacuum").fetchone()[0]!=2:
@@ -222,7 +223,7 @@ class HistoryStore:
         if kind=="eal":self.training.record(kind,payload)
         safe=dict(payload)
         safe.pop("error",None)
-        with self.lock, sqlite3.connect(self.path) as db:
+        with self.lock, closing(sqlite3.connect(self.path)) as db, db:
             db.execute("INSERT INTO snapshots(ts,kind,payload) VALUES(?,?,?)",(now,kind,json.dumps(safe,separators=(",",":"),ensure_ascii=False)))
             db.execute("DELETE FROM snapshots WHERE ts<?",(now-self.retention_hours*3600,))
             if now-self._last_vacuum>=self.VACUUM_INTERVAL:
@@ -237,7 +238,7 @@ class HistoryStore:
         if not kinds:return []
         qs=','.join('?' for _ in kinds)
         args=[start,*kinds,limit]
-        with self.lock, sqlite3.connect(self.path) as db:
+        with self.lock, closing(sqlite3.connect(self.path)) as db, db:
             rows=db.execute(f"SELECT ts,kind,payload FROM snapshots WHERE ts>=? AND kind IN ({qs}) ORDER BY ts ASC LIMIT ?",args).fetchall()
         out=[]
         for ts,kind,payload in rows:
@@ -246,7 +247,7 @@ class HistoryStore:
             out.append({"ts":ts,"kind":kind,"data":data})
         return out
     def status(self):
-        with self.lock, sqlite3.connect(self.path) as db:
+        with self.lock, closing(sqlite3.connect(self.path)) as db, db:
             row=db.execute("SELECT COUNT(*),MIN(ts),MAX(ts) FROM snapshots").fetchone()
         return {"rows":row[0] or 0,"oldest":row[1],"newest":row[2],"retention_hours":self.retention_hours}
 
@@ -338,8 +339,7 @@ class TimetableMatcher:
             for o in obs:
                 events=idx.get(o["station"],[])
                 dest=o.get("dest") or ""
-                preferred=[e for e in events if not dest or dest in e["remaining"]]
-                if preferred:events=preferred
+                events=[e for e in events if dest and e["final"]==dest]
                 deltas=[]
                 for e in events:
                     ss=self._nearest_sched(e["sched"],o["eta_sec"])
@@ -354,8 +354,11 @@ class TimetableMatcher:
                 cost=sum(keep)/len(keep)
                 candidates.append((cost,abs(delay),delay))
             candidates.sort(); cost,_,delay=candidates[0]
+            rival=min((c[0] for c in candidates if abs(c[2]-delay)>=60),default=cost)
+            margin=rival-cost
+            confidence="high" if cost<=25 and len(choices)>=6 and margin>=8 else "medium" if cost<=40 and len(choices)>=3 and margin>=5 else "low"
             out[line]={"delay_sec":delay,"mean_residual_sec":round(cost,1),"samples":len(choices),
-                       "confidence":"high" if cost<=25 and len(choices)>=6 else "medium" if cost<=60 else "low"}
+                       "confidence":confidence,"ambiguity_margin_sec":round(margin,1)}
         return out
 
     def match(self, observations, line_offsets=None):
@@ -365,26 +368,31 @@ class TimetableMatcher:
             events=self.station_index(line).get(sta,[])
             used=set()
             for o in sorted(obs,key=lambda x:x["eta_sec"]):
-                best=None; dest=o.get("dest") or ""
+                dest=o.get("dest") or ""
+                if not dest:continue
+                offset=(line_offsets or {}).get(line,{})
+                reference=offset.get("delay_sec",0) if offset.get("confidence") in ("high","medium") else 0
+                candidates={}
                 for e in events:
                     key=e["key"]
-                    if key in used:continue
+                    if key in used or e["final"]!=dest:continue
                     ss=self._nearest_sched(e["sched"],o["eta_sec"]); delta=o["eta_sec"]-ss
-                    if abs(delta)>1200:continue
-                    if dest and e["final"]!=dest:continue
-                    score=abs(delta)
-                    if best is None or score<best[0]:best=(score,key,delta,e)
-                if best:
-                    _,key,delta,e=best; used.add(key)
-                    samples.setdefault(key,[]).append({"delay":delta,"station":sta,"eta":o["eta"],
-                        "dest":dest,"direction":direction,"platform":o.get("platform"),"ttnt":o.get("ttnt")})
+                    score=abs(delta-reference)
+                    if abs(delta)>1200 or score>60:continue
+                    if key not in candidates or score<candidates[key][0]:candidates[key]=(score,key,delta,e)
+                ranked=sorted(candidates.values(),key=lambda x:x[0])
+                if not ranked or (len(ranked)>1 and ranked[1][0]-ranked[0][0]<30):continue
+                _,key,delta,e=ranked[0]; used.add(key)
+                samples.setdefault(key,[]).append({"delay":delta,"station":sta,"eta":o["eta"],
+                    "dest":dest,"direction":direction,"platform":o.get("platform"),"ttnt":o.get("ttnt")})
         corr={}
         for key,arr in samples.items():
             vals=[x["delay"] for x in arr]; med=int(round(statistics.median(vals)))
             spread=max(vals)-min(vals) if len(vals)>1 else 0
-            line=key.split("|",1)[0]; base=(line_offsets or {}).get(line,{}).get("delay_sec")
+            line=key.split("|",1)[0]; offset=(line_offsets or {}).get(line,{}); base=offset.get("delay_sec") if offset.get("confidence") in ("high","medium") else None
             agrees=base is None or abs(med-base)<=90
-            conf="high" if len(vals)>=2 and spread<=75 and agrees else "medium" if len(vals)>=1 and agrees else "low"
+            stations=len({a["station"] for a in arr})
+            conf="high" if stations>=3 and spread<=30 and agrees else "medium" if stations>=2 and spread<=45 and agrees else "low"
             corr[key]={"delay_sec":med,"samples":len(vals),"spread_sec":spread,"confidence":conf,
                        "agrees_with_line":agrees,"anchors":arr[:6]}
         return corr
@@ -402,6 +410,10 @@ class HeavyRailSource(CachedSource):
             if j.get("status")!=1:
                 return line,sta,[],None,f"status={j.get('status')}"
             obs=[]; block=(j.get("data") or {}).get(f"{line}-{sta}",{})
+            upstream=block.get("curr_time") or j.get("sys_time") or j.get("curr_time")
+            stamp=parse_hk_timestamp(upstream)
+            if stamp is None or not -5 <= (hk_now()-stamp).total_seconds() <= 60:
+                return line,sta,[],upstream,"stale or invalid upstream timestamp"
             for direction in ("UP","DOWN"):
                 for row in block.get(direction,[]) or []:
                     if row.get("valid") not in (None,"Y"):continue

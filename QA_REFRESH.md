@@ -68,3 +68,11 @@ Rebuild generated assets with `python3 tools/build_web_assets.py` (Pillow requir
 - Add whitelisted deduplicated observation archive, offline label/model pipeline and historical evaluation report. Model remains undeployed; persistent cloud storage remains unconfigured.
 - Exit guidance defaults MKK → ADM Exit F; exact car/door mapping remains unverified.
 - Validation: 11 Python tests; JS geometry/freshness, arrival presentation, journey, board-race and position regressions pass. At 390 × 844, arrivals, data and door dialogs work; no document overflow. Light Rail sidebar remains visible. Browser error log empty. GeoTD natural width 12,000 confirmed. Raw runtime files return 404 for GET and HEAD.
+
+## September 27: prediction review and retraining
+- Tightened timetable matching: exact destinations, ambiguous candidate rejection, independent station corroboration, and confidence reduced for periodic line-delay aliases.
+- Reject stale upstream station responses and malformed live position inputs; bound polling requests and ignore old historical trends.
+- Rebuilt arrival labels around distance-aware stopped telemetry, station aliases and uninterrupted segments. Training uses independent arrival groups per cell, entire validation/test dates, and counts fallback errors in evaluation.
+- Trained 85,065 labels / 5,900 arrival groups from September 21–23. Final September 23 test: 7.61 s mean, 15 s 90th percentile; progress-only baseline 8.80 s. Experimental model remains offline because coverage spans only three dates.
+- Added directional MKK→ADM results and independent report loading to Data dialog. 390 px viewport: no page/dialog horizontal overflow and no console errors; collector status renders with last-record times.
+- Preserved newer remote history-vacuum and Light Rail polling work. Explicitly close SQLite connections; 23 Python regressions pass with ResourceWarning treated as error. All JS regression suites and syntax checks pass.
