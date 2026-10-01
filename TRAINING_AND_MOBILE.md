@@ -18,7 +18,7 @@ Set `TRAINING_DB_PATH` to a path on a persistent volume for hosted deployments. 
 ## Training
 Run `python3 tools/train_arrival_model.py` to backfill available local replay snapshots, produce `runtime/training/arrival_labels.csv`, and evaluate `runtime/training/arrival_model.json`. This cannot recover observations never recorded.
 
-The September 27 retraining uses 85,065 labeled observations across 5,900 arrival groups from September 21–23. Stopped telemetry sometimes retains the arriving station pair: the labeler uses SSP distances to identify the arrival station, normalizes station aliases, and breaks sequences on gaps, reversals and unobserved stops. These labels are still a telemetry proxy, not independently verified doors-open times.
+The initial September 27 retraining used 85,065 labeled observations across 5,900 arrival groups from September 21–23. Stopped telemetry sometimes retains the arriving station pair: the labeler uses SSP distances to identify the arrival station, normalizes station aliases, and breaks sequences on gaps, reversals and unobserved stops. These labels are still a telemetry proxy, not independently verified doors-open times.
 
 Entire dates are separated: September 21 training, September 22 model selection/uncertainty estimation, September 23 final test. Arrival groups crossing midnight are purged. Cells need five independent arrival groups; repeated polling frames do not count as independent training support. The selected model uses directed station pair, progress decile and speed band. Missing cells fall back to the learned progress-only baseline, then distance/speed. All held-out rows, including fallbacks, contribute to the reported error.
 
@@ -27,6 +27,14 @@ On 45,652 final-test rows (3,330 arrival groups), mean absolute error is 7.61 se
 For MKK → HUH, HUH → EXC and EXC → ADM, held-out mean errors are 4.89, 4.92 and 6.47 seconds respectively. These are next-stop time errors, not full-journey ETA errors or physical-position errors. The experiment uses only three partial calendar dates and correlated samples; disruption/generalization performance remains unknown. The results are not directly comparable to the earlier 12.1-second result because the labels and split changed.
 
 The learned model remains offline and is not loaded by the live app. At least five labeled dates, sufficient held-out journeys, support and uncertainty coverage are required even for a review recommendation. No gate automatically activates the model. Official ETA predictions are never treated as ground truth.
+
+## October 1 evaluation update
+
+Retraining includes the additional archived September 27 observations: 86,932 labeled rows and 5,993 arrival groups across four dates. Training is September 21–22; validation is September 23; the untouched final test is September 27 (1,867 rows / 93 arrival groups). The prior result above is historical and does not describe this newer test.
+
+The selected progress-and-speed model has 27.46 seconds mean absolute error, versus 32.83 seconds for the learned progress-only baseline and 63.22 seconds for distance/speed. Its 90th-percentile error is 66.5 seconds and direct model support is 91.5%. The ±14-second validation-derived band covers only 59.5% of test rows. This is evidence of poor generalization; there are too few test arrival groups, insufficient dates, and inadequate uncertainty coverage for live use. No tuning was performed on this final test to conceal the regression.
+
+For MKK → HUH specifically, mean error is 34.58 seconds with a 105-second 90th percentile (209 correlated rows). HUH → EXC has 5.39 seconds mean error (60 rows); EXC → ADM has 3.06 seconds (36 rows). These small samples must not be read as guaranteed journey accuracy. The model remains offline. The static report and Data dialog now show the October 1 evaluation.
 
 ## Prediction review fixes
 - Periodic timetable patterns can fit several line delays equally well; such offsets now have low confidence.

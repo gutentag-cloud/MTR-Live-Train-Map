@@ -76,3 +76,9 @@ Rebuild generated assets with `python3 tools/build_web_assets.py` (Pillow requir
 - Trained 85,065 labels / 5,900 arrival groups from September 21–23. Final September 23 test: 7.61 s mean, 15 s 90th percentile; progress-only baseline 8.80 s. Experimental model remains offline because coverage spans only three dates.
 - Added directional MKK→ADM results and independent report loading to Data dialog. 390 px viewport: no page/dialog horizontal overflow and no console errors; collector status renders with last-record times.
 - Preserved newer remote history-vacuum and Light Rail polling work. Explicitly close SQLite connections; 23 Python regressions pass with ResourceWarning treated as error. All JS regression suites and syntax checks pass.
+
+## October 1: finish deployment verification and include newer history
+- Confirmed Pages deployment for 3732ea0 succeeded and its published report matched the September evaluation.
+- Retrained with all available archived East Rail data through September 27: 86,932 labels / 5,993 arrival groups / four dates.
+- Latest-date holdout (93 arrival groups) regressed to 27.46 s mean / 66.5 s p90; validation-derived uncertainty band covered only 59.5%. Kept model offline and published the regression honestly. No model selection or tuning used this test.
+- Hosted collector initially returned an empty archive while warming up. Follow-up verified the new matcher (`ambiguity_margin_sec`) and collection of 448 EAL / 4,745 ETA observations. Long-term retention on the free host remains unverified.
