@@ -26,3 +26,13 @@ class StationEventTests(unittest.TestCase):
         for speed in (None, -1, float("nan")):
             point=self.point("MKK","HUH",True);point["speed_kph"]=speed
             self.assertIsNone(occupied(point))
+
+    def test_invalid_previous_sample_cannot_establish_arrival(self):
+        bad=self.point('MKK','HUH');bad['speed_kph']=None
+        rows=telemetry_intervals([(0,bad),(10,self.point('HUH','EXC',True)),(20,self.point('HUH','EXC'))])
+        self.assertEqual(rows,[])
+
+    def test_moving_train_in_station_can_precede_observed_stop(self):
+        moving=self.point('MKK','HUH');moving['vehicle_in_station']=True
+        rows=telemetry_intervals([(0,moving),(10,self.point('HUH','EXC',True)),(20,self.point('HUH','EXC'))])
+        self.assertEqual([(r['kind'],r['seconds']) for r in rows],[('dwell',10)])

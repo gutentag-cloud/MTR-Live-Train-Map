@@ -29,7 +29,7 @@ def telemetry_intervals(samples):
                         result.append({**departure,'arrival_epoch':ts,'seconds':ts-departure['observed_epoch'],
                             'arrival_lower':previous,'run':f'{train}:{ts}','kind':'travel'})
                     departure=None
-                    visit={'station':at,'arrival':ts,'arrival_lower':previous,'last':ts,'known_arrival':bool(previous_t and station(previous_t.get('next_station'))==at and not occupied(previous_t))}
+                    visit={'station':at,'arrival':ts,'arrival_lower':previous,'last':ts,'known_arrival':bool(previous_t and (number(previous_t.get('speed_kph')) or 0)>=3 and station(previous_t.get('next_station'))==at)}
                 else:visit['last']=ts
             elif t.get('vehicle_in_station') is False and speed is not None and speed>=3 and a and b and a!=b:
                 if visit and visit['station']==a:
