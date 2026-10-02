@@ -62,3 +62,13 @@ class TrainingTests(unittest.TestCase):
         self.assertEqual(result['rows'],1)
         self.assertEqual(result['coverage'],0)
         self.assertEqual(result['mae_seconds'],10)
+
+    def test_explicit_countdown_survives_archive(self):
+        with tempfile.TemporaryDirectory() as root,patch.dict('os.environ',{},clear=True):
+            archive=TrainingStore(root)
+            archive.record('eta',{'observations':[{'line':'EAL','station':'MKK','direction':'DOWN','seq':'1','ttnt':'0','upstream_time':'2026-10-02 12:00:00','observed_at':'2026-10-02T04:00:01+00:00','secret':'never'}]})
+            with closing(sqlite3.connect(archive.path)) as db:
+                record=json.loads(db.execute('select payload from samples').fetchone()[0])
+            self.assertEqual(record['ttnt'],'0')
+            self.assertEqual(record['upstream_time'],'2026-10-02 12:00:00')
+            self.assertNotIn('secret',record)

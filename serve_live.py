@@ -50,6 +50,7 @@ STATION_CACHE_SEC = 120
 # Strategic timing points. A full-network all-station poll would be unnecessarily
 # aggressive; these give multiple anchors per corridor while staying polite.
 HEAVY_STATIONS = {
+    "EAL": ["MKK","HUH","EXC","ADM"],
     "TML": ["TUM","SIH","TIS","YUL","KSR","TWW","MEF","HUH","TAW","MOS","WKS"],
     "TWL": ["TSW","LCK","MEF","PRE","ADM","CEN"],
     "ISL": ["KET","NOP","TIH","CAB","ADM","CEN"],
@@ -80,6 +81,7 @@ BOARD_STATIONS = {
 }
 
 HEAVY_BOOTSTRAP = {
+    "EAL": ["MKK","ADM"],
     "TML": ["HUH", "TAW"],
     "TWL": ["MEF", "ADM"],
     "ISL": ["ADM", "CAB"],
@@ -219,8 +221,8 @@ class HistoryStore:
     VACUUM_INTERVAL=600
     def record(self, kind, payload, min_interval=8):
         now=time.time()
-        if now-self._last.get(kind,0)<min_interval:return
         if kind=="eal":self.training.record(kind,payload)
+        if now-self._last.get(kind,0)<min_interval:return
         safe=dict(payload)
         safe.pop("error",None)
         with self.lock, closing(sqlite3.connect(self.path)) as db, db:
@@ -493,6 +495,7 @@ class HeavyRailSource(CachedSource):
                 ent=self.station_cache.get((line,station))
                 if ent and now-ent["ts"] <= STATION_CACHE_SEC:
                     out.extend(ent["observations"]); cached.append(line)
+        if self.history:self.history.training.record("eta",{"observations":out})
         live=self.get() or {}
         try:
             age=time.time()-dt.datetime.fromisoformat(live.get("fetched_at") or "").timestamp()
@@ -689,7 +692,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin","*")
         self.send_header("Cache-Control",cache)
         if len(body)>256 and "gzip" in (self.headers.get("Accept-Encoding") or ""):
-            body=gzip.compress(body); self.send_header("Content-Encoding","gzip")
+            body=gzip.compress(body,compresslevel=3); self.send_header("Content-Encoding","gzip")
         self.send_header("Content-Length",str(len(body))); self.end_headers(); self.wfile.write(body)
     def _bytes(self,body,content_type="application/octet-stream",status=200,cache="public, max-age=120"):
         self.send_response(status)
@@ -701,7 +704,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
         # Avoid stale JS/CSS/HTML when users replace one build with another on the same localhost URL.
         if not self.path.startswith("/api/"):
-            self.send_header("Cache-Control","no-store, max-age=0")
+            self.send_header("Cache-Control","public, max-age=3600" if self.path.startswith("/assets/") else "no-store, max-age=0")
         super().end_headers()
     def send_head(self):
         resolved=Path(self.translate_path(self.path)).resolve()

@@ -175,7 +175,7 @@ function openStationQuick(code){
   // Open the full Board at the same time. It combines direct MTR ETA with the
   // app's ETA-corrected timetable/WTT fallback, so a station click is useful
   // even when a direct station request is temporarily unavailable.
-  (window.V12_OPEN_STATION||window.V11_OPEN_STATION)?.(code);
+  // The full board opens only when explicitly requested from the sheet.
   renderQuick();fetchQuick();clearInterval(quickTimer);quickTimer=setInterval(()=>{if(!document.hidden)fetchQuick()},8000)
 }
 function closeQuick(){quickCode=null;setActiveGeoTDStation(null);clearInterval(quickTimer);quickTimer=null;$('#stationQuick')?.classList.add('hidden')}

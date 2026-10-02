@@ -47,3 +47,20 @@ For MKK → HUH specifically, mean error is 34.58 seconds with a 105-second 90th
 
 ## Exit F
 The boarding guidance form defaults to Mong Kok East → Admiralty, Exit F. There is no verified platform/car/door mapping in this repository, so the app does not invent an optimal door. It links the official MTR Mobile Fast Exit instructions. An actual shortest-walk recommendation remains pending verified mapping for the arrival platform and exit.
+
+
+## October 2 station-event and mobile update
+
+`python3 tools/train_station_events.py` extracts station dwell and directed departure-to-next-arrival intervals from archived telemetry. It rejects observation gaps over 30 seconds, missing/invalid speeds, and unknown initial arrival times. Intervals retain observation bounds; they are telemetry proxies, not measured door opening or closing times. The latest completed historical date is held out; the current collection date is excluded. Sparse segment cells do not get a fitted median.
+
+The October 2 run contains 11,201 historical intervals from four dates. September 27 is held out: travel mean absolute error is 36.92 seconds (73/73 supported intervals, p90 81 seconds); dwell mean error is 29.67 seconds (75/75 supported, p90 110 seconds). This simple segment-duration baseline remains offline. It does not establish one-second accuracy or validate physical train positions.
+
+The archive now preserves the API's explicit `ttnt` and upstream timestamp. This run found 158 observed 1-minute → 0-minute transitions among 23,764 explicit-countdown rows; median observed duration is 57.02 seconds. First observation can occur after a countdown phase begins, so this is not the true phase duration. Sequence numbers are not stable train identities, and a disappearing row is never labeled as departure. Historical rows that omitted `ttnt` cannot be recovered from ETA timestamps. A verified join from countdowns to individual train departures is still missing; countdown transitions are exported separately and are not used as measured travel labels.
+
+East Rail samples are archived before replay throttling, and MKK/HUH/EXC/ADM are routine ETA collection anchors. Raw CSV/model outputs stay in `runtime/training/`; only aggregate evaluation is public. Retraining is an explicit offline command, not an automatic live model rollout.
+
+Phone controls collapse into Options, station taps open a single sheet, full-board navigation is explicit, and the map refits on viewport changes. Pointer-based pinch zoom is implemented; a physical-phone multi-touch test is still needed. The original 12K image remains available and selected by default, which can still consume substantial memory on phones.
+
+Concurrent identical API GETs share a request with independent caller cancellation. Hidden map marker rendering is skipped; asset caching and cheaper API compression reduce repeat work. These changes do not remove upstream update delays or the hosted API's cold starts. Collector status queries no longer hold the archive writer lock and are cached for 15 seconds.
+
+The Exit & door panel links the official Admiralty layout and Fast Exit instructions and can store a clearly labeled personal note locally. The public layout does not identify train car/door numbers. An automatic optimal-door recommendation for MKK → ADM Exit F remains unavailable until a verified mapping is obtained.
