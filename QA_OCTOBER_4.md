@@ -8,3 +8,5 @@
 - Fast Exit combinations tested/imported: none. No accessible official bulk car/door dataset or app-control interface found. The feature remains unavailable without a verified mapping.
 - No new physical-phone/browser verification was available through this session's tools. Existing October 2 responsive checks remain historical evidence only.
 - Publication includes source and aggregate reports; runtime databases, CSV labels and models containing local run IDs remain local.
+
+- Live station countdown uses wall time and is verified to keep ticking when the simulation is paused; accelerated simulation does not redraw it more than once per real second.
