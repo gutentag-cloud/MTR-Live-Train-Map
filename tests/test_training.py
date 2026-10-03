@@ -4,7 +4,7 @@ from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from unittest.mock import patch
 from training_store import TrainingStore
-from tools.train_arrival_model import build_rows,train,split_rows,fit,evaluate
+from tools.train_arrival_model import build_rows,train,split_rows,fit,evaluate,historical_backtests
 
 class TrainingTests(unittest.TestCase):
     def test_archive_dedup_and_whitelist(self):
@@ -72,3 +72,30 @@ class TrainingTests(unittest.TestCase):
             self.assertEqual(record['ttnt'],'0')
             self.assertEqual(record['upstream_time'],'2026-10-02 12:00:00')
             self.assertNotIn('secret',record)
+
+    def test_one_second_metric_uses_actual_error(self):
+        row={'run':'one','from_station':'MKK','to_station':'HUH','fraction':.5,'remaining_m':100,'speed_kph':36,'target_remaining_s':10}
+        result=evaluate([row,{**row,'run':'two','target_remaining_s':20}],{},'progress',{})
+        self.assertEqual(result['within_one_second_fraction'],.5)
+        self.assertEqual(result['within_five_seconds_fraction'],.5)
+
+    def test_backtests_never_train_on_future_dates(self):
+        import datetime as dt
+        rows=[]
+        for d in range(21,25):
+            ts=dt.datetime.fromisoformat(f'2026-09-{d:02d}T12:00:00+08:00').timestamp()
+            for i in range(5):rows.append({'run':f'{d}:{i}','arrival_epoch':ts,'observed_epoch':ts-20,'from_station':'MKK','to_station':'HUH','fraction':.5,'speed_kph':36,'remaining_m':100,'target_remaining_s':20})
+        original=historical_backtests(rows)
+        self.assertEqual(original['folds'][0]['training_dates'],['2026-09-21'])
+        self.assertEqual(original['folds'][0]['validation_dates'],['2026-09-22'])
+        for r in rows[-5:]:r['target_remaining_s']=800
+        changed=historical_backtests(rows)
+        self.assertEqual(original['folds'][0],changed['folds'][0])
+        self.assertNotEqual(original['folds'][-1]['mae_seconds'],changed['folds'][-1]['mae_seconds'])
+
+    def test_ongoing_date_is_excluded(self):
+        import datetime as dt
+        ts=dt.datetime.now(dt.timezone(dt.timedelta(hours=8))).timestamp()
+        result=train([{'arrival_epoch':ts,'observed_epoch':ts-10,'run':'today'}])['report']
+        self.assertEqual(result['excluded_in_progress_rows'],1)
+        self.assertEqual(result['labeled_rows'],0)

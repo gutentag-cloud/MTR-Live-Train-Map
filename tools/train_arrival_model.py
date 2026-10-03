@@ -140,10 +140,15 @@ def evaluate(rows, cells, kind, fallback, interval=None):
             'coverage': covered / len(rows) if rows else 0,
             'constant_speed_mae_seconds': mean(base_errors), 'progress_baseline_mae_seconds': mean(coarse_errors),
             'interval_coverage': intervals / len(rows) if rows and interval is not None else None,
+            'within_one_second_fraction': sum(e <= 1 for e in errors) / len(errors) if errors else None,
+            'within_five_seconds_fraction': sum(e <= 5 for e in errors) / len(errors) if errors else None,
             'segments': {k: {'rows': len(v), 'mae_seconds': mean(v), 'p90_error_seconds': percentile(v, .9)} for k, v in sorted(by_segment.items())}}
 
 
 def train(rows):
+    today = dt.datetime.now(HKT).date().isoformat()
+    excluded = sum(day(r['arrival_epoch']) >= today for r in rows)
+    rows = [r for r in rows if day(r['arrival_epoch']) < today]
     training, validation, test = split_rows(rows)
     coarse = fit(training, 'progress')
     candidates = {kind: fit(training, kind) for kind in ('progress', 'progress_speed')}
@@ -164,6 +169,7 @@ def train(rows):
         reasons.append('Validation-derived uncertainty interval covers less than 85% of test rows')
     report = {'schema_version': 2, 'generated_at': dt.datetime.now(dt.timezone.utc).isoformat(),
               'labeled_rows': len(rows), 'journeys': len({r['run'] for r in rows}), 'days': len(dates),
+              'excluded_in_progress_rows': excluded,
               'dates': dates, 'training_dates': sorted({day(r['arrival_epoch']) for r in training}),
               'validation_dates': sorted({day(r['arrival_epoch']) for r in validation}),
               'test_dates': sorted({day(r['arrival_epoch']) for r in test}),
@@ -178,6 +184,27 @@ def train(rows):
     return {'report': report, 'cells': cells, 'fallback_cells': coarse}
 
 
+def historical_backtests(rows):
+    """Replay each eligible date using only earlier training/validation dates."""
+    today = dt.datetime.now(HKT).date().isoformat()
+    rows = [r for r in rows if day(r['arrival_epoch']) < today]
+    dates = sorted({day(r['arrival_epoch']) for r in rows})
+    folds = []
+    for test_date in dates[2:]:
+        model = train([r for r in rows if day(r['arrival_epoch']) <= test_date])
+        report = model['report']
+        folds.append({'test_date': test_date, 'training_dates': report['training_dates'],
+                      'validation_dates': report['validation_dates'], 'model': report['model'],
+                      **{k: v for k, v in report['test'].items() if k != 'segments'}})
+    total = sum(f['rows'] for f in folds)
+    groups = sum(f['journeys'] for f in folds)
+    return {'method': 'Expanding whole-date training, preceding date validation, next date test; no future dates used',
+            'folds': folds, 'rows': total, 'journeys': groups,
+            'mae_seconds': sum(f['mae_seconds'] * f['rows'] for f in folds if f['rows']) / total if total else None,
+            'journey_mae_seconds': sum(f['journey_mae_seconds'] * f['journeys'] for f in folds if f['journeys']) / groups if groups else None,
+            'within_one_second_fraction': sum(f['within_one_second_fraction'] * f['rows'] for f in folds if f['rows']) / total if total else None}
+
+
 def main():
     archive = TrainingStore(ROOT)
     history = ROOT / 'runtime/history.sqlite3'
@@ -187,12 +214,13 @@ def main():
                 data = json.loads(payload)
                 if data.get('ok') and not data.get('stale'): archive.record('eal', data)
     with closing(sqlite3.connect(archive.path)) as db, db:
-        rows = build_rows((ts, json.loads(payload)) for ts, payload in db.execute("SELECT observed,payload FROM samples WHERE kind='eal' ORDER BY observed"))
+        rows = build_rows((ts, json.loads(payload)) for ts, payload in db.execute("SELECT observed,payload FROM samples WHERE kind='eal'"))
     output = ROOT / 'runtime/training'; output.mkdir(parents=True, exist_ok=True)
     fields = ['from_station','to_station','fraction','remaining_m','speed_kph','observed_epoch','arrival_epoch','run','target_remaining_s','label_source']
     with (output / 'arrival_labels.csv').open('w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fields); writer.writeheader(); writer.writerows(rows)
     model = train(rows)
+    model['report']['historical_backtests'] = historical_backtests(rows)
     (output / 'arrival_model.json').write_text(json.dumps(model, indent=2))
     (ROOT / 'training_report.json').write_text(json.dumps(model['report'], indent=2))
     print(json.dumps({k:v for k,v in model['report'].items() if k not in ('test','validation_candidates')}, indent=2))

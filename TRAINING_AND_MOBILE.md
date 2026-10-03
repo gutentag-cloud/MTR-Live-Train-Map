@@ -64,3 +64,16 @@ Phone controls collapse into Options, station taps open a single sheet, full-boa
 Concurrent identical API GETs share a request with independent caller cancellation. Hidden map marker rendering is skipped; asset caching and cheaper API compression reduce repeat work. These changes do not remove upstream update delays or the hosted API's cold starts. Collector status queries no longer hold the archive writer lock and are cached for 15 seconds.
 
 The Exit & door panel links the official Admiralty layout and Fast Exit instructions and can store a clearly labeled personal note locally. The public layout does not identify train car/door numbers. An automatic optimal-door recommendation for MKK → ADM Exit F remains unavailable until a verified mapping is obtained.
+
+
+## October 4 seconds display and historical retraining
+
+Arrival times now retain HH:MM:SS, with countdowns ticking in seconds for every source. The feed's repeated second values are retained as source data; no random second offset is introduced. Reaching zero is labeled “Due · unconfirmed,” and older expired predictions request an update. This display precision does not establish one-second accuracy.
+
+The latest experiment uses 123,033 labeled observations and 7,263 arrival groups from six dates: September 21–23, September 27 and October 2–3. Training uses the first four dates, validation October 2, and final test October 3. Current-day observations are excluded from experiments. October 3 has only 45 test arrival groups, so it remains a small, partial collection day. Latest-test MAE is 15.551 seconds, p90 42 seconds, and 12% of its 1,250 observations fall within one second of the first stopped telemetry label. A ±15-second validation-derived band covers 69.2% of test observations. The model remains offline.
+
+Four expanding-date historical tests train and select using only dates before each test date. Across 83,333 test observations / 4,686 arrival groups, observation-weighted MAE is 8.10 seconds and group-weighted MAE is 6.73 seconds. Within-one-second coverage is 15.6%. These folds use different earlier training sets and correlated observations; they demonstrate variability, not a guaranteed error bound. Tests on September 23, September 27, October 2 and October 3 have mean errors of 7.61, 27.46, 7.43 and 15.55 seconds respectively. Additional history does not establish one-second physical arrival accuracy.
+
+Station-event retraining now includes 13,704 intervals and 4,063 observed explicit 1→0 countdown transitions. October 3 held-out departure-to-next-arrival MAE is 26.24 seconds (49 intervals), and dwell MAE is 12.63 seconds (46 intervals). Countdown transitions remain separate from measured travel/dwell labels because no verified per-train identity join exists.
+
+Fast Exit research checked the official MTR Mobile guide, the MTR routes/fares/facilities catalogue, and public code repositories. No accessible bulk car/door mapping or testable Fast Exit API was found. The official guide exposes an app workflow, and MTR Mobile is not accessible through this session's tools. No claim is made that all combinations have been tested or imported. A route/exit recommendation still requires verified line, travel direction, platform, train formation and door-number convention; no values are fabricated.

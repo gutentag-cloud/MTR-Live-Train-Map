@@ -1,36 +1,38 @@
 {
-  "generated_at": "2026-10-02T13:09:05.733881+00:00",
+  "generated_at": "2026-10-03T16:11:02.649302+00:00",
   "dates": [
     "2026-09-21",
     "2026-09-22",
     "2026-09-23",
-    "2026-09-27"
+    "2026-09-27",
+    "2026-10-02",
+    "2026-10-03"
   ],
-  "events": 11135,
-  "excluded_in_progress_events": 971,
-  "training_events": 10973,
-  "test_date": "2026-09-27",
+  "events": 13704,
+  "excluded_in_progress_events": 0,
+  "training_events": 13582,
+  "test_date": "2026-10-03",
   "test": {
     "travel": {
-      "test_events": 73,
-      "supported_events": 73,
+      "test_events": 49,
+      "supported_events": 49,
       "coverage": 1.0,
-      "mae_seconds": 36.917808219178085,
-      "p90_error_seconds": 81.0
+      "mae_seconds": 26.244897959183675,
+      "p90_error_seconds": 65.0
     },
     "dwell": {
-      "test_events": 74,
-      "supported_events": 74,
+      "test_events": 46,
+      "supported_events": 46,
       "coverage": 1.0,
-      "mae_seconds": 29.945945945945947,
-      "p90_error_seconds": 109.5
+      "mae_seconds": 12.630434782608695,
+      "p90_error_seconds": 15.0
     }
   },
   "deployed": false,
   "target": "travel: first moving sample after departure \u2192 first stopped sample at next station; dwell: first stopped \u2192 first moving",
   "limitations": "Telemetry transitions have up to 30s observation gaps. Error metrics cover supported segments only; coverage is reported. No exact one-second accuracy claim.",
-  "explicit_countdown_rows": 198852,
-  "one_to_zero_events": 1549,
-  "one_to_zero_median_seconds": 54.64088797569275,
+  "explicit_countdown_rows": 626922,
+  "one_to_zero_events": 4063,
+  "one_to_zero_median_seconds": 58.80927801132202,
   "countdown_note": "Countdown disappearance is not a departure. Cross-station identity cannot be established from sequence numbers."
 }

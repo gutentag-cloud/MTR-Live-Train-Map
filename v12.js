@@ -205,7 +205,7 @@ function renderQuick(){
   const walk=quickWalk?d<quickWalk*60?' · Too soon for your walk':d<quickWalk*60+60?' · Tight connection':' · Time to walk':'';
   h+=`<div class="sq-row"><i style="background:${col}"></i><div><b>${esc(o.line)} · ${esc(dest)}</b><span>${esc(o.direction||'')} · platform ${esc(o.platform||'—')} · ${refined?'Model + live':'Official estimate'}</span><span>${Math.floor(A.age(o,quickFetchAt))}s old${gap}${walk}</span></div><time>${quickRaw?fmt(eta):A.time(eta,refined)}<small>${A.countdown(d,refined)}</small></time></div>`;
  }
- h+=`<button class="sq-full">Open full station board</button><div class="sq-note">Official estimates are shown to the minute. Model seconds appear only with an unambiguous timetable match and live delay support; greater accuracy is not guaranteed. Walking checks use your selected duration, not a measured station walking time.</div>`;
+ h+=`<button class="sq-full">Open full station board</button><div class="sq-note">Times and countdowns are shown in seconds and update every second. They remain estimates: the feed refreshes less often, and one-second accuracy has not been established. Due does not confirm arrival or departure. Walking checks use your selected duration.</div>`;
  box.innerHTML=h;
  box.querySelector('.sq-close').onclick=closeQuick;
  box.querySelector('.sq-refresh').onclick=fetchQuick;
